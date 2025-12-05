@@ -10,7 +10,7 @@ class IservMailManager:
         self.mUsername = aUsername
         self.mPassword = aPassword
         self.mURL = aURL
-        self.mAPIconnection = ISAPI(self.mUsername,self.mPassword,self.mURL)
+        self.mAPIconnection = ISAPI.IServAPI(self.mUsername,self.mPassword,self.mURL)
         
 
     def sendMail(self, aMailData):

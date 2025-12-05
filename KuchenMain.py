@@ -32,7 +32,8 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.pbnDelete.clicked.connect(self.DeleteSelected)
         self.pbnOpenMailList.clicked.connect(self.ShowMailListDialog)
         self.pbnSendMail.clicked.connect(self.SendMails)
-
+        self.pbnSendMail.setDisabled(True)
+        
         self.rbnName.toggled.connect(self.SortColumn)
         self.rbnCakeCount.toggled.connect(self.SortColumn)
         self.rbnHanuta.toggled.connect(self.SortColumn)
