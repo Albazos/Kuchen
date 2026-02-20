@@ -1,4 +1,4 @@
-from IServAPI import IServAPI as ISAPI
+from IServAPI import IServAPI
 
 class IservMailManager:
     mUsername = None
@@ -10,7 +10,7 @@ class IservMailManager:
         self.mUsername = aUsername
         self.mPassword = aPassword
         self.mURL = aURL
-        self.mAPIconnection = ISAPI.IServAPI(self.mUsername,self.mPassword,self.mURL)
+        self.mAPIconnection = IServAPI(self.mUsername,self.mPassword,self.mURL)
         
 
     def sendMail(self, aMailData):
