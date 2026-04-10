@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg30"
+   sodipodi:docname="kuchen_icon.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview30"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="7.84375"
+     inkscape:cx="53.035857"
+     inkscape:cy="35.824701"
+     inkscape:window-width="1366"
+     inkscape:window-height="710"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg30" />
+  <defs
+     id="defs11">
+    <linearGradient
+       id="choc"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0%"
+         stop-color="#7d4530"
+         id="stop1" />
+      <stop
+         offset="100%"
+         stop-color="#4a2518"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       id="ganache"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0%"
+         stop-color="#3d1f12"
+         id="stop3" />
+      <stop
+         offset="60%"
+         stop-color="#2a1509"
+         id="stop4" />
+    </linearGradient>
+    <linearGradient
+       id="plate"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0%"
+         stop-color="#e8e8e8"
+         id="stop5" />
+      <stop
+         offset="100%"
+         stop-color="#c0c0c0"
+         id="stop6" />
+    </linearGradient>
+    <linearGradient
+       id="flame"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0%"
+         stop-color="#fff4a0"
+         id="stop7" />
+      <stop
+         offset="40%"
+         stop-color="#ffaa00"
+         id="stop8" />
+      <stop
+         offset="100%"
+         stop-color="#ff4400"
+         id="stop9" />
+    </linearGradient>
+    <radialGradient
+       id="cherry"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(1.5298805,-0.25498008)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-3"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(20.701195,1.2749004)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-6" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-7" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-5"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(51.386454,0.21513944)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-62" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-9" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-0"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(38.609562,0.0996016)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-9" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-3" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-2"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(13.374502,-0.03984064)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-61" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-8" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-02"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(26.059761,0.59760956)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-3" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-75" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-9"
+       cx="49"
+       cy="46.5"
+       r="6.0000002"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-21.454183,-0.52988048)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-7" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-36" />
+    </radialGradient>
+    <radialGradient
+       id="cherry-9-8"
+       cx="49"
+       cy="46.5"
+       r="6"
+       fx="49"
+       fy="46.5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-9.9442211,0.1872507)">
+      <stop
+         offset="0%"
+         stop-color="#ff4040"
+         id="stop10-7-4" />
+      <stop
+         offset="100%"
+         stop-color="#a01020"
+         id="stop11-36-5" />
+    </radialGradient>
+  </defs>
+  <!-- Shadow -->
+  <ellipse
+     cx="64"
+     cy="112"
+     rx="50"
+     ry="6"
+     fill="#00000020"
+     id="ellipse11" />
+  <!-- Plate -->
+  <ellipse
+     cx="64"
+     cy="106"
+     rx="54"
+     ry="10"
+     fill="url(#plate)"
+     id="ellipse12" />
+  <ellipse
+     cx="64"
+     cy="105"
+     rx="50"
+     ry="8"
+     fill="#f0f0f0"
+     id="ellipse13" />
+  <ellipse
+     cx="64"
+     cy="105"
+     rx="44"
+     ry="6"
+     fill="#e0e0e0"
+     id="ellipse14" />
+  <!-- Cake body -->
+  <rect
+     x="20"
+     y="56"
+     width="88"
+     height="50"
+     rx="8"
+     fill="url(#choc)"
+     id="rect14" />
+  <line
+     x1="24"
+     y1="80"
+     x2="104"
+     y2="80"
+     stroke="#5a2e1c"
+     stroke-width="0.6"
+     opacity="0.35"
+     id="line14" />
+  <!-- Dark chocolate border line around top edge -->
+  <line
+     x1="22"
+     y1="58"
+     x2="106"
+     y2="58"
+     stroke="#2a1509"
+     stroke-width="2.5"
+     stroke-linecap="round"
+     id="line15" />
+  <!-- Ganache top -->
+  <rect
+     x="20"
+     y="50"
+     width="88"
+     height="10"
+     rx="5"
+     fill="url(#ganache)"
+     id="rect15" />
+  <!-- Drips -->
+  <path
+     d="M30 60 Q30 76 32 80"
+     stroke="url(#ganache)"
+     stroke-width="5"
+     fill="none"
+     stroke-linecap="round"
+     id="path15" />
+  <path
+     d="M44 60 Q43 84 45 88"
+     stroke="url(#ganache)"
+     stroke-width="6"
+     fill="none"
+     stroke-linecap="round"
+     id="path16" />
+  <path
+     d="M58 60 Q57 72 59 74"
+     stroke="url(#ganache)"
+     stroke-width="5"
+     fill="none"
+     stroke-linecap="round"
+     id="path17" />
+  <path
+     d="M72 60 Q71 82 73 86"
+     stroke="url(#ganache)"
+     stroke-width="6"
+     fill="none"
+     stroke-linecap="round"
+     id="path18" />
+  <path
+     d="M86 60 Q86 70 88 72"
+     stroke="url(#ganache)"
+     stroke-width="5"
+     fill="none"
+     stroke-linecap="round"
+     id="path19" />
+  <path
+     d="M97 60 Q97 74 99 78"
+     stroke="url(#ganache)"
+     stroke-width="5"
+     fill="none"
+     stroke-linecap="round"
+     id="path20" />
+  <!-- Chocolate shavings on top -->
+  <rect
+     x="34"
+     y="48"
+     width="6"
+     height="2.2"
+     rx="1"
+     fill="#2a1509"
+     transform="rotate(-12 37 49)"
+     opacity="0.65"
+     id="rect20" />
+  <rect
+     x="11.734721"
+     y="51.629818"
+     width="6"
+     height="2.2"
+     rx="1"
+     fill="#2a1509"
+     transform="rotate(-12)"
+     opacity="0.65"
+     id="rect20-9" />
+  <rect
+     x="21.126497"
+     y="53.626099"
+     width="6"
+     height="2.2"
+     rx="1"
+     fill="#2a1509"
+     transform="rotate(-12)"
+     opacity="0.65"
+     id="rect20-7" />
+  <rect
+     x="48"
+     y="47"
+     width="7"
+     height="2.2"
+     rx="1"
+     fill="#3d1f12"
+     transform="rotate(18 51.5 48)"
+     opacity="0.55"
+     id="rect21" />
+  <rect
+     x="66"
+     y="48"
+     width="6"
+     height="2"
+     rx="1"
+     fill="#2a1509"
+     transform="rotate(-6 69 49)"
+     opacity="0.65"
+     id="rect22" />
+  <rect
+     x="80"
+     y="47"
+     width="5"
+     height="2.2"
+     rx="1"
+     fill="#3d1f12"
+     transform="rotate(14 82.5 48)"
+     opacity="0.55"
+     id="rect23" />
+  <rect
+     x="56"
+     y="50"
+     width="5"
+     height="1.8"
+     rx="0.9"
+     fill="#2a1509"
+     transform="rotate(25 58.5 50.9)"
+     opacity="0.5"
+     id="rect24" />
+  <rect
+     x="74"
+     y="50"
+     width="6"
+     height="1.8"
+     rx="0.9"
+     fill="#3d1f12"
+     transform="rotate(-20 77 50.9)"
+     opacity="0.5"
+     id="rect25" />
+  <!-- Candle -->
+  <rect
+     x="60"
+     y="24"
+     width="5"
+     height="26"
+     rx="2"
+     fill="#d4a56a"
+     id="rect26" />
+  <rect
+     x="61"
+     y="24"
+     width="1.2"
+     height="26"
+     rx="0.6"
+     fill="#c49050"
+     opacity="0.5"
+     id="rect27" />
+  <line
+     x1="62.5"
+     y1="24"
+     x2="62.5"
+     y2="19"
+     stroke="#333"
+     stroke-width="1"
+     stroke-linecap="round"
+     id="line27" />
+  <!-- Flame -->
+  <ellipse
+     cx="62.5"
+     cy="15"
+     rx="3.5"
+     ry="6"
+     fill="url(#flame)"
+     opacity="0.9"
+     id="ellipse27" />
+  <ellipse
+     cx="62.5"
+     cy="15.8"
+     rx="1.6"
+     ry="3"
+     fill="#fff8a0"
+     opacity="0.8"
+     id="ellipse28" />
+  <!-- Cherry -->
+  <circle
+     cx="51.529881"
+     cy="47.745022"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28"
+     style="fill:url(#cherry)" />
+  <ellipse
+     cx="50.029881"
+     cy="45.745022"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29" />
+  <circle
+     cx="101.38645"
+     cy="48.215141"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-2"
+     style="fill:url(#cherry-5)" />
+  <ellipse
+     cx="99.886452"
+     cy="46.215141"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-7" />
+  <!-- Subtle side highlight -->
+  <rect
+     x="22"
+     y="58"
+     width="3"
+     height="46"
+     rx="1.5"
+     fill="#ffffff"
+     opacity="0.06"
+     id="rect30" />
+  <circle
+     cx="88.609558"
+     cy="48.099602"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-0"
+     style="fill:url(#cherry-0)" />
+  <ellipse
+     cx="87.109558"
+     cy="46.099602"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-6" />
+  <circle
+     cx="63.3745"
+     cy="47.960159"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-9"
+     style="fill:url(#cherry-2)" />
+  <ellipse
+     cx="61.8745"
+     cy="45.960159"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-2" />
+  <circle
+     cx="76.059761"
+     cy="48.59761"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-22"
+     style="fill:url(#cherry-02)" />
+  <ellipse
+     cx="74.559761"
+     cy="46.59761"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-8" />
+  <circle
+     cx="28.545815"
+     cy="47.470119"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-29"
+     style="fill:url(#cherry-9)" />
+  <ellipse
+     cx="27.045815"
+     cy="45.470119"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-3" />
+  <circle
+     cx="40.055779"
+     cy="48.187252"
+     r="5"
+     fill="url(#cherry)"
+     id="circle28-29-3"
+     style="fill:url(#cherry-9-8)" />
+  <ellipse
+     cx="38.555779"
+     cy="46.187252"
+     rx="1.5"
+     ry="1"
+     fill="#ff8080"
+     opacity="0.5"
+     id="ellipse29-3-6" />
+</svg>
