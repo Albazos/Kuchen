@@ -1,6 +1,7 @@
 import sys
+import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QDialog
-from PySide6.QtGui import QStandardItem, QStandardItemModel
+from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
 import DataManager as DM
@@ -194,7 +195,10 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kuchen_icon.svg")
+    app.setWindowIcon(QIcon(icon_path))
     lCMainWindow = CMainWindow()
+    lCMainWindow.setWindowIcon(QIcon(icon_path))
     lCMainWindow.show()
     lCMainWindow.activateWindow()
     sys.exit(app.exec())
