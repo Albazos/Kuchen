@@ -1,19 +1,20 @@
 #works with the Data and holds it
 import csv
 import os
+import html
 
-_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-class DataManger():
-    mData = []
-    mMailData = []
-    mCompleteMailData = []
+class DataManager():
     
-    mSortedMailData = []
-    mSortedData = []  
-    
-    mSortedMailColumnIndex = None
-    mSortedColumnIndex = None 
+    def __init__(self):
+        self.mData = []
+        self.mMailData = []
+        self.mCompleteMailData = []
+        self.mSortedMailData = []
+        self.mSortedData = []
+        self.mSortedMailColumnIndex = None
+        self.mSortedColumnIndex = None
+        self.mHeaders = []
+        self._base_dir = os.path.dirname(os.path.abspath(__file__))
     
     def setSortedData(self, aData):
         self.mSortedData = aData
@@ -64,15 +65,16 @@ class DataManger():
     def getSortedMailColumnIndex(self):
         return self.mSortedMailColumnIndex
     
-    def LoadStandartFile(self, aForMainTable = True):
+    def LoadStandardFile(self, aForMainTable=True):
         if aForMainTable:
-            lFilePath = os.path.join(_BASE_DIR, "Data", "CakeData.csv")
+            lFilePath = os.path.join(self._base_dir, "Data", "CakeData.csv")
         else: 
-            lFilePath = os.path.join(_BASE_DIR, "Data", "Klassen", "EITB23A.csv")
-        if lFilePath:
+            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", "EITB23A.csv")
+        try:
             with open(lFilePath, newline='') as csvfile:
-                lDialect = csv.Sniffer().sniff(csvfile.readline())
+                lSample = csvfile.read(4096)
                 csvfile.seek(0)
+                lDialect = csv.Sniffer().sniff(lSample)
                 lReader = csv.reader(csvfile, dialect=lDialect)
                 if aForMainTable:
                     self.setData(list(lReader))              
@@ -83,12 +85,12 @@ class DataManger():
                     self.mHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
             if aForMainTable:            
-                self.setSortedData(self.getData())
+                self.setSortedData([row[:] for row in self.getData()])
             else:
-                self.setSortedMailData(self.getMailData())
-            csvfile.close()
+                self.setSortedMailData([row[:] for row in self.getMailData()])
             return True  
-        else:
+        except (OSError, csv.Error) as e:
+            print(f"Error loading file: {e}")
             return False
     
     def sortData(self, aSortColumnIndex, aForMain = True):
@@ -105,10 +107,10 @@ class DataManger():
     
     def SaveFile(self, aForMainTable = True):
         if aForMainTable:
-            lFilePath = os.path.join(_BASE_DIR, "Data", "CakeData.csv")
+            lFilePath = os.path.join(self._base_dir, "Data", "CakeData.csv")
         else: 
-            lFilePath = os.path.join(_BASE_DIR, "Data", "Klassen", "EITB23A.csv")
-        if lFilePath:
+            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", "EITB23A.csv")
+        try:
             with open(lFilePath, 'w', newline='') as csvfile:
                 lWriter = csv.writer(csvfile, delimiter=',')
                 lWriter.writerow(self.mHeaders)
@@ -116,27 +118,30 @@ class DataManger():
                     lWriter.writerows(self.getData())
                 else:
                     lWriter.writerows(self.getSortedMailData())
-                csvfile.close()
             return True       
-        else:
+        except OSError as e:
+            print(f"Error saving file: {e}")
             return False
         
     def ImportFile(self, aPath, aForMainTable = True):
-         with open(aPath, newline='') as csvfile:
-                    lDialect = csv.Sniffer().sniff(csvfile.readline())
-                    csvfile.seek(0)
-                    lReader = csv.reader(csvfile, dialect=lDialect)
-                    if aForMainTable:
-                        self.setData(list(lReader))          
-                        self.mHeaders = self.getData()[0]
-                        del self.getData()[0]
-                        self.setSortedData(self.getData())
-                    else:
-                        self.setMailData(list(lReader))          
-                        self.mHeaders = self.getMailData()[0]
-                        del self.getMailData()[0]
-                        self.setSortedMailData(self.getMailData())
-                    csvfile.close() 
+        try:
+            with open(aPath, newline='') as csvfile:
+                lSample = csvfile.read(4096)
+                csvfile.seek(0)
+                lDialect = csv.Sniffer().sniff(lSample)
+                lReader = csv.reader(csvfile, dialect=lDialect)
+                if aForMainTable:
+                    self.setData(list(lReader))          
+                    self.mHeaders = self.getData()[0]
+                    del self.getData()[0]
+                    self.setSortedData([row[:] for row in self.getData()])
+                else:
+                    self.setMailData(list(lReader))          
+                    self.mHeaders = self.getMailData()[0]
+                    del self.getMailData()[0]
+                    self.setSortedMailData([row[:] for row in self.getMailData()])
+        except (OSError, csv.Error) as e:
+            print(f"Error importing file: {e}")
     
     
     def createCompleteMailData(self):
@@ -157,22 +162,23 @@ class DataManger():
         td_style = "padding: 8px; border: 1px solid #dddddd; text-align: left;"
         tr_even_style = "background-color: #f9f9f9;"
 
-        html = f'<table style="{table_style}">\n'
+        lHtml = f'<table style="{table_style}">\n'
 
         if aHeaders:
-            html += "  <thead>\n    <tr>\n"
+            lHtml += "  <thead>\n    <tr>\n"
             for header in aHeaders:
-                html += f'      <th style="{th_style}">{header}</th>\n'
-            html += "    </tr>\n  </thead>\n"
+                lHtml += f'      <th style="{th_style}">{html.escape(str(header))}</th>\n'
+            lHtml += "    </tr>\n  </thead>\n"
 
-        html += "  <tbody>\n"
+        lHtml += "  <tbody>\n"
         for i, row in enumerate(self.mData):
             style = tr_even_style if i % 2 == 0 else ""
-            html += f'    <tr style="{style}">\n'
+            lHtml += f'    <tr style="{style}">\n'
             for item in row:
-                html += f'      <td style="{td_style}">{item}</td>\n'
-            html += "    </tr>\n"
+                lHtml += f'      <td style="{td_style}">{html.escape(str(item))}</td>\n'
+            lHtml += "    </tr>\n"
 
-        html += "  </tbody>\n</table>"
+        lHtml += "  </tbody>\n</table>"
+        return lHtml
 
         return html

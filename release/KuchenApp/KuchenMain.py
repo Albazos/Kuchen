@@ -12,17 +12,14 @@ from ui.UIMainWindow_ui import Ui_MainWindow
 
 class CMainWindow(QMainWindow, Ui_MainWindow):
     
-    mHeaders = ["Name", "CakeCount","Hanuta","Waffel", "Date"]
-    mSearchText = ""
-
-    mDM = DM.DataManger()
-    mKMM = None
-    mISMM = None
-    
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        KMM.CKuchenDialog(aDataManager=self.mDM)
+        
+        self.mHeaders = ["Name", "CakeCount","Hanuta","Waffel", "Date"]
+        self.mDM = DM.DataManager()
+        self.mKMM = None
+        self.mISMM = None
         
         self.clearLabels()
         
@@ -47,7 +44,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.tableView.setModel(self.model)
 
         self.model.dataChanged.connect(self.CellEdited)
-        if self.mDM.LoadStandartFile():
+        if self.mDM.LoadStandardFile():
             self.FillTable()
             self.labInfo.setText("File imported successfully")
         else:
@@ -71,7 +68,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         if lLD.getSendState() == False:
             self.labInfo.setText("ERROR with Mail")
         else:
-            self.labInfo.setText("Mails send")
+            self.labInfo.setText("Mails sent")
             
         
     def ImportFile(self):
@@ -138,7 +135,17 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
     
     def QuitButton(self):
-        sys.exit()
+        lReply = QMessageBox.question(
+            self, "Beenden",
+            "Möchtest du vor dem Beenden speichern?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
+        )
+        if lReply == QMessageBox.StandardButton.Yes:
+            self.SaveFile()
+            self.close()
+        elif lReply == QMessageBox.StandardButton.No:
+            self.close()
+        # Cancel: do nothing
 
     
     def SortColumn(self):
@@ -169,29 +176,27 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
 
     def Search(self, aText):
-        self.mSearchText = aText
         if self.checkforEnabledRBN():
             if aText.strip():
-                lSData = self.mDM.getSortedData()
-                lSData = [lRow for lRow in lSData if aText.lower() in str(lRow[self.mDM.getSortedColumnIndex()]).lower()]
-                self.mDM.setSortedData(lSData)
+                lFiltered = [lRow for lRow in self.mDM.getData() if aText.lower() in str(lRow[self.mDM.getSortedColumnIndex()]).lower()]
+                self.mDM.setSortedData(lFiltered)
             else:
-                self.mDM.setSortedData(self.mDM.getData())
+                self.mDM.setSortedData([row[:] for row in self.mDM.getData()])
         else:
             if aText.strip():  
                self.mDM.setSortedData([lRow for lRow in self.mDM.getData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
             else:
-                self.mDM.setSortedData(self.mDM.getData())
+                self.mDM.setSortedData([row[:] for row in self.mDM.getData()])
     
         self.FillTable(True)
 
             
     def checkforEnabledRBN(self):
-        return (self.rbnCakeCount.isEnabled() or
-                self.rbnHanuta.isEnabled() or
-                self.rbnName.isEnabled() or
-                self.rbnWaffel.isEnabled() or
-                self.rbnDate.isEnabled())
+        return (self.rbnCakeCount.isChecked() or
+                self.rbnHanuta.isChecked() or
+                self.rbnName.isChecked() or
+                self.rbnWaffel.isChecked() or
+                self.rbnDate.isChecked())
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -1,5 +1,4 @@
-import sys
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QDialog
+from PySide6.QtWidgets import QApplication, QFileDialog, QDialog
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
@@ -8,16 +7,13 @@ import DataManager as DM
 
 class CKuchenDialog(QDialog, Ui_Dialog):
     
-    mHeaders = ["Name", "Mail"]
-    mSearchText = ""
-    mDM = DM.DataManger() #overwritten at init
-    mISMM = None
-    
     def __init__(self, aDataManager):
         super().__init__()
         self.setupUi(self)
         
+        self.mHeaders = ["Name", "Mail"]
         self.mDM = aDataManager
+        self.mISMM = None
         self.clearLabels()
         
         self.pbnImport.clicked.connect(self.ImportFile)
@@ -35,7 +31,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         self.tableView.setModel(self.model)
 
         self.model.dataChanged.connect(self.CellEdited)
-        if self.mDM.LoadStandartFile(aForMainTable=False):
+        if self.mDM.LoadStandardFile(aForMainTable=False):
             self.FillTable()
             self.labInfo.setText("File imported successfully")
         else:
@@ -135,23 +131,21 @@ class CKuchenDialog(QDialog, Ui_Dialog):
 
 
     def Search(self, aText):
-        self.mSearchText = aText
         if self.checkforEnabledRBN():
             if aText.strip():
-                lSData = self.mDM.getSortedMailData()
-                lSData = [lRow for lRow in lSData if aText.lower() in str(lRow[self.mDM.getSortedMailColumnIndex()]).lower()]
-                self.mDM.setSortedMailData(lSData)
+                lFiltered = [lRow for lRow in self.mDM.getMailData() if aText.lower() in str(lRow[self.mDM.getSortedMailColumnIndex()]).lower()]
+                self.mDM.setSortedMailData(lFiltered)
             else:
-                self.mDM.setSortedMailData(self.mDM.getMailData())
+                self.mDM.setSortedMailData([row[:] for row in self.mDM.getMailData()])
         else:
             if aText.strip():  
                self.mDM.setSortedMailData([lRow for lRow in self.mDM.getMailData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
             else:
-                self.mDM.setSortedMailData(self.mDM.getMailData())
+                self.mDM.setSortedMailData([row[:] for row in self.mDM.getMailData()])
     
         self.FillTable(True)
 
             
     def checkforEnabledRBN(self):
-        return (self.rbnName.isEnabled() or
-                self.rbnMail.isEnabled())
+        return (self.rbnName.isChecked() or
+                self.rbnMail.isChecked())

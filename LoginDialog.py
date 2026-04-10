@@ -1,19 +1,14 @@
-import sys
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
-from PySide6.QtGui import QStandardItem, QStandardItemModel
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QDialog
 
 import IservMailManager as ISM
 from UILoginDialog_ui import Ui_Dialog
 
 class CLoginDialog(QDialog, Ui_Dialog):
     
-    mSendState = False
-    mMailData = None
-    
     def __init__(self,aMailData):
        super().__init__()
        self.setupUi(self)
+       self.mSendState = False
        self.mMailData = aMailData
        
        self.pbnCancel.clicked.connect(self.CancelButton)
