@@ -1,4 +1,4 @@
-from IServAPI import IServAPI
+from IServAPIEdited import IServAPI
 
 class IservMailManager:
     mUsername = None
