@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
@@ -17,9 +17,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         
-        self.mHeaders = ["Name", "CakeCount","Hanuta","Waffel", "Date"]
         self.mDM = DM.DataManager()
         self.mKMM = None
+        self.mRadioButtons = []
         
         self.mLogger = AL.AppLogger()
         self.mLogger.errorOccurred.connect(self._showError)
@@ -36,12 +36,6 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.pbnOpenMailList.clicked.connect(self.ShowMailListDialog)
         self.pbnSendMail.clicked.connect(self.SendMails)
         #self.pbnSendMail.setDisabled(True)
-        
-        self.rbnName.toggled.connect(self.SortColumn)
-        self.rbnCakeCount.toggled.connect(self.SortColumn)
-        self.rbnHanuta.toggled.connect(self.SortColumn)
-        self.rbnWaffel.toggled.connect(self.SortColumn)
-        self.rbnDate.toggled.connect(self.SortColumn)
 
         self.leSearch.textChanged.connect(self.Search)
 
@@ -50,9 +44,12 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
         self.model.dataChanged.connect(self.CellEdited)
         if self.mDM.LoadStandardFile():
+            self.mHeaders = self.mDM.mMainHeaders[:]
+            self._createRadioButtons()
             self.FillTable()
             self.labInfo.setText("File imported successfully")
         else:
+            self.mHeaders = []
             self.labInfo.setText("No file selected")
         self.SortColumn()
     
@@ -80,16 +77,13 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lFileDialog.setNameFilter("CSV files (*.csv)")
         lFileDialog.setViewMode(QFileDialog.ViewMode.List)
         lFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        self.rbnDate.setEnabled(True)
-        self.rbnCakeCount.setEnabled(True)
-        self.rbnHanuta.setEnabled(True)
-        self.rbnWaffel.setEnabled(True)
-        self.rbnName.setEnabled(True)
         if lFileDialog.exec():
             lSelectedFile = lFileDialog.selectedFiles()
             if lSelectedFile:
                 lFilePath = lSelectedFile[0]
                 self.mDM.ImportFile(lFilePath)
+                self.mHeaders = self.mDM.mMainHeaders[:]
+                self._createRadioButtons()
                 self.FillTable()
                 self.labInfo.setText("File imported successfully")
         else:
@@ -161,18 +155,12 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     
     def SortColumn(self):
         lSortColumn = None
-        if self.rbnName.isChecked():
-            lSortColumn = "Name"
-        elif self.rbnCakeCount.isChecked():
-            lSortColumn = "CakeCount"
-        elif self.rbnHanuta.isChecked():
-            lSortColumn = "Hanuta"
-        elif self.rbnWaffel.isChecked():
-            lSortColumn = "Waffel"
-        elif self.rbnDate.isChecked():
-            lSortColumn = "Date"
+        for lRbn in self.mRadioButtons:
+            if lRbn.isChecked():
+                lSortColumn = lRbn.property("headerKey")
+                break
 
-        if lSortColumn:
+        if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn))
             self.mDM.sortData(self.mDM.getSortedColumnIndex())
             self.FillTable(True)
@@ -210,11 +198,21 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
             
     def checkforEnabledRBN(self):
-        return (self.rbnCakeCount.isChecked() or
-                self.rbnHanuta.isChecked() or
-                self.rbnName.isChecked() or
-                self.rbnWaffel.isChecked() or
-                self.rbnDate.isChecked())
+        return any(lRbn.isChecked() for lRbn in self.mRadioButtons)
+
+    def _createRadioButtons(self):
+        for lRbn in self.mRadioButtons:
+            self.verticalLayout.removeWidget(lRbn)
+            lRbn.deleteLater()
+        self.mRadioButtons.clear()
+        for i, lHeader in enumerate(self.mHeaders):
+            lRbn = QRadioButton(lHeader)
+            lRbn.setProperty("headerKey", lHeader)
+            if i == 0:
+                lRbn.setChecked(True)
+            lRbn.toggled.connect(self.SortColumn)
+            self.verticalLayout.addWidget(lRbn)
+            self.mRadioButtons.append(lRbn)
 
     def _showError(self, aTitle, aMessage):
         QMessageBox.critical(self, aTitle, aMessage)

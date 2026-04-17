@@ -17,8 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QPushButton,
-    QRadioButton, QSizePolicy, QTableView, QVBoxLayout,
-    QWidget)
+    QSizePolicy, QTableView, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -57,18 +56,6 @@ class Ui_Dialog(object):
         self.labSort.setAlignment(Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignHCenter)
 
         self.verticalLayout.addWidget(self.labSort)
-
-        self.rbnName = QRadioButton(Dialog)
-        self.rbnName.setObjectName(u"rbnName")
-        self.rbnName.setEnabled(True)
-        self.rbnName.setChecked(True)
-
-        self.verticalLayout.addWidget(self.rbnName)
-
-        self.rbnMail = QRadioButton(Dialog)
-        self.rbnMail.setObjectName(u"rbnMail")
-
-        self.verticalLayout.addWidget(self.rbnMail)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
@@ -133,8 +120,6 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
         self.labSearch.setText(QCoreApplication.translate("Dialog", u"Search:", None))
         self.labSort.setText(QCoreApplication.translate("Dialog", u"Sort:", None))
-        self.rbnName.setText(QCoreApplication.translate("Dialog", u"Name", None))
-        self.rbnMail.setText(QCoreApplication.translate("Dialog", u"Mail", None))
         self.pbnQuit.setText(QCoreApplication.translate("Dialog", u"Quit", None))
         self.pbnImport.setText(QCoreApplication.translate("Dialog", u"Import", None))
         self.pbnAdd.setText(QCoreApplication.translate("Dialog", u"Add New", None))

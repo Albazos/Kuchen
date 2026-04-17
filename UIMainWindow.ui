@@ -59,44 +59,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QRadioButton" name="rbnName">
-              <property name="text">
-               <string>Name</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbnCakeCount">
-              <property name="text">
-               <string>Cake Count</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbnHanuta">
-              <property name="text">
-               <string>Hanuta</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbnWaffel">
-              <property name="text">
-               <string>Waffeln</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbnDate">
-              <property name="text">
-               <string>Date</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>

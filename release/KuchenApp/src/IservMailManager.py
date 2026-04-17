@@ -21,6 +21,6 @@ class IservMailManager:
             self.mAPIconnection.send_email(lTo,"Kuchenreminder",body="", html_body=lHtmlBody) # type: ignore
             return True
         except Exception as e:
-            self.mLogger.error("Mail senden", f"Fehler beim Senden der Mail: {e}")
+            self.mLogger.error("Send Mail", f"Error sending mail: {e}")
             return False
     

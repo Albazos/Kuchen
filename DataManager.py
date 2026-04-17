@@ -87,10 +87,12 @@ class DataManager():
                     self.setData(list(lReader))              
                     self.mMainHeaders = self.getData()[0]
                     del self.getData()[0]
+                    self._padRows(self.getData(), len(self.mMainHeaders))
                 else:
                     self.setMailData(list(lReader))              
                     self.mMailHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
+                    self._padRows(self.getMailData(), len(self.mMailHeaders))
             if aForMainTable:            
                 self.setSortedData([row[:] for row in self.getData()])
             else:
@@ -99,6 +101,11 @@ class DataManager():
         except (OSError, csv.Error) as e:
             self.mLogger.error("Load File", f"Error loading file: {e}")
             return False
+    
+    def _padRows(self, aData, aHeaderLen):
+        for lRow in aData:
+            while len(lRow) < aHeaderLen:
+                lRow.append("")
     
     def sortData(self, aSortColumnIndex, aForMain = True):
         if aForMain:
@@ -144,11 +151,13 @@ class DataManager():
                     self.setData(list(lReader))          
                     self.mMainHeaders = self.getData()[0]
                     del self.getData()[0]
+                    self._padRows(self.getData(), len(self.mMainHeaders))
                     self.setSortedData([row[:] for row in self.getData()])
                 else:
                     self.setMailData(list(lReader))          
                     self.mMailHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
+                    self._padRows(self.getMailData(), len(self.mMailHeaders))
                     self.setSortedMailData([row[:] for row in self.getMailData()])
         except (OSError, csv.Error) as e:
             self.mLogger.error("Import File", f"Error importing file: {e}")

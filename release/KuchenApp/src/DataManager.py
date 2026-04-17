@@ -97,7 +97,7 @@ class DataManager():
                 self.setSortedMailData([row[:] for row in self.getMailData()])
             return True  
         except (OSError, csv.Error) as e:
-            self.mLogger.error("Datei laden", f"Fehler beim Laden der Datei: {e}")
+            self.mLogger.error("Load File", f"Error loading file: {e}")
             return False
     
     def sortData(self, aSortColumnIndex, aForMain = True):
@@ -130,7 +130,7 @@ class DataManager():
                     lWriter.writerows(self.getMailData())
             return True       
         except OSError as e:
-            self.mLogger.error("Datei speichern", f"Fehler beim Speichern: {e}")
+            self.mLogger.error("Save File", f"Error saving file: {e}")
             return False
         
     def ImportFile(self, aPath, aForMainTable = True):
@@ -151,7 +151,7 @@ class DataManager():
                     del self.getMailData()[0]
                     self.setSortedMailData([row[:] for row in self.getMailData()])
         except (OSError, csv.Error) as e:
-            self.mLogger.error("Datei importieren", f"Fehler beim Importieren: {e}")
+            self.mLogger.error("Import File", f"Error importing file: {e}")
     
     
     def createCompleteMailData(self):

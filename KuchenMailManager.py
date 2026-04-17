@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFileDialog, QDialog
+from PySide6.QtWidgets import QFileDialog, QDialog, QRadioButton
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
@@ -11,9 +11,9 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         super().__init__()
         self.setupUi(self)
         
-        self.mHeaders = ["Name", "Mail"]
         self.mDM = aDataManager
         self.mLogger = AL.AppLogger()
+        self.mRadioButtons = []
         self.clearLabels()
         
         self.pbnImport.clicked.connect(self.ImportFile)
@@ -22,9 +22,6 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         self.pbnAdd.clicked.connect(self.AddRow)
         self.pbnDelete.clicked.connect(self.DeleteSelected)
 
-        self.rbnName.toggled.connect(self.SortColumn)
-        self.rbnMail.toggled.connect(self.SortColumn)
-
         self.leSearch.textChanged.connect(self.Search)
 
         self.model = QStandardItemModel()
@@ -32,9 +29,12 @@ class CKuchenDialog(QDialog, Ui_Dialog):
 
         self.model.dataChanged.connect(self.CellEdited)
         if self.mDM.LoadStandardFile(aForMainTable=False):
+            self.mHeaders = self.mDM.mMailHeaders[:]
+            self._createRadioButtons()
             self.FillTable()
             self.labInfo.setText("File imported successfully")
         else:
+            self.mHeaders = []
             self.labInfo.setText("No file selected")
         self.SortColumn()
     
@@ -50,13 +50,13 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lFileDialog.setNameFilter("CSV files (*.csv)")
         lFileDialog.setViewMode(QFileDialog.ViewMode.List)
         lFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        self.rbnMail.setEnabled(True)
-        self.rbnName.setEnabled(True)
         if lFileDialog.exec():
             lSelectedFile = lFileDialog.selectedFiles()
             if lSelectedFile:
                 lFilePath = lSelectedFile[0]
                 self.mDM.ImportFile(lFilePath, aForMainTable=False)
+                self.mHeaders = self.mDM.mMailHeaders[:]
+                self._createRadioButtons()
                 self.FillTable()
                 self.labInfo.setText("File imported successfully")
         else:
@@ -118,14 +118,14 @@ class CKuchenDialog(QDialog, Ui_Dialog):
     
     def SortColumn(self):
         lSortColumn = None
-        if self.rbnName.isChecked():
-            lSortColumn = "Name"
-        elif self.rbnMail.isChecked():
-            lSortColumn = "Mail"
+        for lRbn in self.mRadioButtons:
+            if lRbn.isChecked():
+                lSortColumn = lRbn.property("headerKey")
+                break
 
-        if lSortColumn:
-            self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn), aForMain=False )
-            self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False),aForMain=False)
+        if lSortColumn and lSortColumn in self.mHeaders:
+            self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn), aForMain=False)
+            self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aForMain=False)
             self.FillTable(True)
 
     def CellEdited(self, aItem):
@@ -161,5 +161,18 @@ class CKuchenDialog(QDialog, Ui_Dialog):
 
             
     def checkforEnabledRBN(self):
-        return (self.rbnName.isChecked() or
-                self.rbnMail.isChecked())
+        return any(lRbn.isChecked() for lRbn in self.mRadioButtons)
+
+    def _createRadioButtons(self):
+        for lRbn in self.mRadioButtons:
+            self.verticalLayout.removeWidget(lRbn)
+            lRbn.deleteLater()
+        self.mRadioButtons.clear()
+        for i, lHeader in enumerate(self.mHeaders):
+            lRbn = QRadioButton(lHeader)
+            lRbn.setProperty("headerKey", lHeader)
+            if i == 0:
+                lRbn.setChecked(True)
+            lRbn.toggled.connect(self.SortColumn)
+            self.verticalLayout.addWidget(lRbn)
+            self.mRadioButtons.append(lRbn)

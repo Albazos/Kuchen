@@ -18,8 +18,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMainWindow, QPushButton,
-    QRadioButton, QSizePolicy, QStatusBar, QTableView,
-    QVBoxLayout, QWidget)
+    QSizePolicy, QStatusBar, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -69,32 +69,6 @@ class Ui_MainWindow(object):
         self.labSort.setAlignment(Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignHCenter)
 
         self.verticalLayout.addWidget(self.labSort)
-
-        self.rbnName = QRadioButton(self.centralwidget)
-        self.rbnName.setObjectName(u"rbnName")
-        self.rbnName.setChecked(True)
-
-        self.verticalLayout.addWidget(self.rbnName)
-
-        self.rbnCakeCount = QRadioButton(self.centralwidget)
-        self.rbnCakeCount.setObjectName(u"rbnCakeCount")
-
-        self.verticalLayout.addWidget(self.rbnCakeCount)
-
-        self.rbnHanuta = QRadioButton(self.centralwidget)
-        self.rbnHanuta.setObjectName(u"rbnHanuta")
-
-        self.verticalLayout.addWidget(self.rbnHanuta)
-
-        self.rbnWaffel = QRadioButton(self.centralwidget)
-        self.rbnWaffel.setObjectName(u"rbnWaffel")
-
-        self.verticalLayout.addWidget(self.rbnWaffel)
-
-        self.rbnDate = QRadioButton(self.centralwidget)
-        self.rbnDate.setObjectName(u"rbnDate")
-
-        self.verticalLayout.addWidget(self.rbnDate)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
@@ -175,11 +149,6 @@ class Ui_MainWindow(object):
         self.actionExport.setText(QCoreApplication.translate("MainWindow", u"Export", None))
         self.labSearch.setText(QCoreApplication.translate("MainWindow", u"Search:", None))
         self.labSort.setText(QCoreApplication.translate("MainWindow", u"Sort:", None))
-        self.rbnName.setText(QCoreApplication.translate("MainWindow", u"Name", None))
-        self.rbnCakeCount.setText(QCoreApplication.translate("MainWindow", u"Cake Count", None))
-        self.rbnHanuta.setText(QCoreApplication.translate("MainWindow", u"Hanuta", None))
-        self.rbnWaffel.setText(QCoreApplication.translate("MainWindow", u"Waffeln", None))
-        self.rbnDate.setText(QCoreApplication.translate("MainWindow", u"Date", None))
         self.pbnSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.pbnImport.setText(QCoreApplication.translate("MainWindow", u"Import", None))
         self.pbnQuit.setText(QCoreApplication.translate("MainWindow", u"Quit", None))
