@@ -11,6 +11,8 @@ Ausfuehren:  python3 build_release.py
 
 import os
 import shutil
+import subprocess
+import sys
 import zipfile
 
 # --- Konfiguration ---
@@ -27,6 +29,13 @@ SRC_FILES = [
     "KuchenMailManager.py",
     "LoginDialog.py",
 ]
+
+# UI-Quelldateien (.ui -> _ui.py) - werden vor dem Kopieren kompiliert
+UI_SOURCE_FILES = {
+    "UIMainWindow.ui":  "UIMainWindow_ui.py",
+    "UIMailsDialog.ui": "UIMailsDialog_ui.py",
+    "UILoginDialog.ui": "UILoginDialog_ui.py",
+}
 
 # UI-Dateien die nach ui/ kopiert werden
 UI_FILES = [
@@ -109,6 +118,37 @@ Projektstruktur:
 Starten:
   python KuchenMain.py
 """
+
+
+def compile_ui():
+    """Kompiliert .ui Dateien zu _ui.py mit pyside6-uic."""
+    # pyside6-uic aus dem gleichen Python-Environment nutzen
+    uic = shutil.which("pyside6-uic")
+    if uic is None:
+        # Fallback: im gleichen Prefix wie das aktuelle Python suchen
+        prefix = os.path.dirname(sys.executable)
+        candidate = os.path.join(prefix, "pyside6-uic")
+        if os.path.isfile(candidate):
+            uic = candidate
+    if uic is None:
+        print("[ui]    FEHLER: pyside6-uic nicht gefunden!")
+        print("        Installiere PySide6: pip install PySide6")
+        sys.exit(1)
+
+    count = 0
+    for ui_file, py_file in UI_SOURCE_FILES.items():
+        ui_path = os.path.join(SCRIPT_DIR, ui_file)
+        py_path = os.path.join(SCRIPT_DIR, py_file)
+        if not os.path.isfile(ui_path):
+            print(f"[ui]    WARNUNG: {ui_file} nicht gefunden, uebersprungen")
+            continue
+        result = subprocess.run([uic, ui_path, "-o", py_path],
+                                capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"[ui]    FEHLER bei {ui_file}: {result.stderr.strip()}")
+            sys.exit(1)
+        count += 1
+    print(f"[ui]    {count} UI-Datei(en) kompiliert")
 
 
 def clean_build():
@@ -210,6 +250,7 @@ def main():
     print()
 
     clean_build()
+    compile_ui()
     create_dirs()
     copy_files()
     patch_imports()

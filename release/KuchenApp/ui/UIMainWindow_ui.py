@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'UIMainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.10.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -178,6 +178,7 @@ class Ui_MainWindow(object):
         self.rbnName.setText(QCoreApplication.translate("MainWindow", u"Name", None))
         self.rbnCakeCount.setText(QCoreApplication.translate("MainWindow", u"Cake Count", None))
         self.rbnHanuta.setText(QCoreApplication.translate("MainWindow", u"Hanuta", None))
+        self.rbnWaffel.setText(QCoreApplication.translate("MainWindow", u"Waffeln", None))
         self.rbnDate.setText(QCoreApplication.translate("MainWindow", u"Date", None))
         self.pbnSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.pbnImport.setText(QCoreApplication.translate("MainWindow", u"Import", None))

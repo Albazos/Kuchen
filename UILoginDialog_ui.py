@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'UILoginDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.10.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -39,23 +39,23 @@ class Ui_Dialog(object):
         self.labMail = QLabel(Dialog)
         self.labMail.setObjectName(u"labMail")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.labMail)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labMail)
 
         self.labPsw = QLabel(Dialog)
         self.labPsw.setObjectName(u"labPsw")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.labPsw)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labPsw)
 
         self.ledUser = QLineEdit(Dialog)
         self.ledUser.setObjectName(u"ledUser")
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.ledUser)
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.ledUser)
 
         self.ledPsw = QLineEdit(Dialog)
         self.ledPsw.setObjectName(u"ledPsw")
         self.ledPsw.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.ledPsw)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.ledPsw)
 
 
         self.verticalLayout.addLayout(self.formLayout)
