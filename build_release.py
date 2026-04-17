@@ -92,7 +92,7 @@ Projektstruktur:
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
   +-- Data/
-      |-- CakeData.csv         <- Kuchendaten (leer, nur Header)
+      |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
       |-- Settings/
       |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/
@@ -167,14 +167,14 @@ def copy_files():
         shutil.copy2(os.path.join(DEV_DIR, "assets", f), os.path.join(BUILD_DIR, "assets"))
 
     # Data/ - leere CSVs mit nur Header-Zeile erstellen
-    with open(os.path.join(BUILD_DIR, "Data", "CakeData.csv"), "w", newline="") as f:
+    with open(os.path.join(BUILD_DIR, "Data", "StandardCakeData.csv"), "w", newline="") as f:
         f.write("Name,CakeCount,Hanuta,Waffel,Date\n")
     with open(os.path.join(BUILD_DIR, "Data", "Klassen", "StandardKlasse.csv"), "w", newline="") as f:
         f.write("Name,Mail\n")
 
     # Data/Settings - Default settings.ini
     with open(os.path.join(BUILD_DIR, "Data", "Settings", "settings.ini"), "w", encoding="utf-8") as f:
-        f.write("[Klassen]\nDateiname = StandardKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
+        f.write("[Klassen]\nDateiname = StandardKlasse.csv\n\n[CakeData]\nDateiname = StandardCakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
 
     # __init__.py fuer src/ und ui/
     for pkg in ["src", "ui"]:

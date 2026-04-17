@@ -10,7 +10,7 @@ class SettingsManager:
             "Dateiname": "StandardKlasse.csv",
         },
         "CakeData": {
-            "Dateiname": "CakeData.csv",
+            "Dateiname": "StandardCakeData.csv",
         },
         "IServ": {
             "Domain": "wvss.de",
