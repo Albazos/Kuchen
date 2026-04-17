@@ -2,6 +2,7 @@
 import csv
 import os
 import html
+from src import SettingsManager as SM
 
 class DataManager():
     
@@ -15,6 +16,7 @@ class DataManager():
         self.mSortedColumnIndex = None
         self.mHeaders = []
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.mSettings = SM.SettingsManager()
     
     def setSortedData(self, aData):
         self.mSortedData = aData
@@ -67,9 +69,11 @@ class DataManager():
     
     def LoadStandardFile(self, aForMainTable=True):
         if aForMainTable:
-            lFilePath = os.path.join(self._base_dir, "Data", "CakeData.csv")
+            lCakeDatei = self.mSettings.getCakeDataDateiname()
+            lFilePath = os.path.join(self._base_dir, "Data", lCakeDatei)
         else: 
-            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", "EITB23A.csv")
+            lKlassenDatei = self.mSettings.getKlassenDateiname()
+            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", lKlassenDatei)
         try:
             with open(lFilePath, newline='') as csvfile:
                 lSample = csvfile.read(4096)
@@ -107,9 +111,11 @@ class DataManager():
     
     def SaveFile(self, aForMainTable = True):
         if aForMainTable:
-            lFilePath = os.path.join(self._base_dir, "Data", "CakeData.csv")
+            lCakeDatei = self.mSettings.getCakeDataDateiname()
+            lFilePath = os.path.join(self._base_dir, "Data", lCakeDatei)
         else: 
-            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", "EITB23A.csv")
+            lKlassenDatei = self.mSettings.getKlassenDateiname()
+            lFilePath = os.path.join(self._base_dir, "Data", "Klassen", lKlassenDatei)
         try:
             with open(lFilePath, 'w', newline='') as csvfile:
                 lWriter = csv.writer(csvfile, delimiter=',')

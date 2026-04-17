@@ -28,6 +28,7 @@ SRC_FILES = [
     "IservMailManager.py",
     "KuchenMailManager.py",
     "LoginDialog.py",
+    "SettingsManager.py",
 ]
 
 # UI-Quelldateien (.ui -> _ui.py) - werden vor dem Kopieren kompiliert
@@ -73,6 +74,9 @@ IMPORT_REPLACEMENTS = {
     "IservMailManager.py": [
         ("from IServAPIEdited_standalone import IServAPI", "from src.IServAPIEdited_standalone import IServAPI"),
     ],
+    "DataManager.py": [
+        ("import SettingsManager as SM", "from src import SettingsManager as SM"),
+    ],
 }
 
 README_CONTENT = """\
@@ -110,9 +114,11 @@ Projektstruktur:
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
   +-- Data/
-      |-- CakeData.csv
+      |-- CakeData.csv         <- Kuchendaten (leer, nur Header)
+      |-- Settings/
+      |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/
-          +-- EITB23A.csv
+          +-- StandartKlasse.csv  <- Klassenliste (leer, nur Header)
 
 
 Starten:
@@ -160,7 +166,7 @@ def clean_build():
 
 def create_dirs():
     """Erstellt die Release-Ordnerstruktur."""
-    for subdir in ["src", "ui", "assets", "Data", "Data/Klassen"]:
+    for subdir in ["src", "ui", "assets", "Data", "Data/Klassen", "Data/Settings"]:
         os.makedirs(os.path.join(BUILD_DIR, subdir), exist_ok=True)
     print("[dirs]  Ordnerstruktur erstellt")
 
@@ -182,10 +188,15 @@ def copy_files():
     for f in ASSET_FILES:
         shutil.copy2(os.path.join(SCRIPT_DIR, f), os.path.join(BUILD_DIR, "assets"))
 
-    # Data/
-    data_src = os.path.join(SCRIPT_DIR, "Data")
-    if os.path.isdir(data_src):
-        shutil.copytree(data_src, os.path.join(BUILD_DIR, "Data"), dirs_exist_ok=True)
+    # Data/ - leere CSVs mit nur Header-Zeile erstellen
+    with open(os.path.join(BUILD_DIR, "Data", "CakeData.csv"), "w", newline="") as f:
+        f.write("Name,CakeCount,Hanuta,Waffel,Date\n")
+    with open(os.path.join(BUILD_DIR, "Data", "Klassen", "StandartKlasse.csv"), "w", newline="") as f:
+        f.write("Name,Mail\n")
+
+    # Data/Settings - Default settings.ini
+    with open(os.path.join(BUILD_DIR, "Data", "Settings", "settings.ini"), "w", encoding="utf-8") as f:
+        f.write("[Klassen]\nDateiname = StandartKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n")
 
     # __init__.py fuer src/ und ui/
     for pkg in ["src", "ui"]:

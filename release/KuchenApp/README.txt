@@ -32,9 +32,11 @@ Projektstruktur:
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
   +-- Data/
-      |-- CakeData.csv
+      |-- CakeData.csv         <- Kuchendaten (leer, nur Header)
+      |-- Settings/
+      |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/
-          +-- EITB23A.csv
+          +-- StandartKlasse.csv  <- Klassenliste (leer, nur Header)
 
 
 Starten:
