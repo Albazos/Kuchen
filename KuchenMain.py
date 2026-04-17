@@ -24,6 +24,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mLogger = AL.AppLogger()
         self.mLogger.errorOccurred.connect(self._showError)
         self.mLogger.warningOccurred.connect(self._showWarning)
+        self.mLogger.infoOccurred.connect(self._showInfo)
         
         self.clearLabels()
         
@@ -57,9 +58,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     
     def SaveFile(self):
         if self.mDM.SaveFile():
-            self.labInfo.setText("File saved successfully")
+            self.mLogger.info("Save", "File saved successfully.")
         else:
-            self.labInfo.setText("Error with File Save")
+            self.mLogger.error("Save", "Error saving file.")
             
     def ShowMailListDialog(self):
         self.mKMM = KMM.CKuchenDialog(aDataManager=self.mDM)
@@ -69,9 +70,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lLD = LD.CLoginDialog(aMailData = self.mDM.createCompleteMailData())
         lLD.exec() # type: ignore
         if not lLD.getSendState():
-            self.labInfo.setText("ERROR with Mail")
+            self.mLogger.error("Mail", "Failed to send mails.")
         else:
-            self.labInfo.setText("Mails sent")
+            self.mLogger.info("Mail", "Mails sent successfully.")
             
         
     def ImportFile(self):
@@ -220,6 +221,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
     def _showWarning(self, aTitle, aMessage):
         QMessageBox.warning(self, aTitle, aMessage)
+
+    def _showInfo(self, aTitle, aMessage):
+        QMessageBox.information(self, aTitle, aMessage)
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

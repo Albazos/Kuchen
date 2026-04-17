@@ -67,7 +67,7 @@ IMPORT_REPLACEMENTS = {
     ],
     "KuchenMailManager.py": [
         ("from UIMailsDialog_ui import Ui_Dialog", "from ui.UIMailsDialog_ui import Ui_Dialog"),
-        ("import DataManager as DM", "from src import DataManager as DM"),
+        ("import AppLogger as AL", "from src import AppLogger as AL"),
     ],
     "LoginDialog.py": [
         ("import IservMailManager as ISM", "from src import IservMailManager as ISM"),

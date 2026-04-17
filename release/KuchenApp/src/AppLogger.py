@@ -6,6 +6,7 @@ class AppLogger(QObject):
 
     errorOccurred = Signal(str, str)
     warningOccurred = Signal(str, str)
+    infoOccurred = Signal(str, str)
 
     _instance = None
 
@@ -24,3 +25,6 @@ class AppLogger(QObject):
 
     def warning(self, aTitle, aMessage):
         self.warningOccurred.emit(aTitle, aMessage)
+
+    def info(self, aTitle, aMessage):
+        self.infoOccurred.emit(aTitle, aMessage)

@@ -3,6 +3,7 @@ from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
 from UIMailsDialog_ui import Ui_Dialog
+import AppLogger as AL
 
 class CKuchenDialog(QDialog, Ui_Dialog):
     
@@ -12,6 +13,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         
         self.mHeaders = ["Name", "Mail"]
         self.mDM = aDataManager
+        self.mLogger = AL.AppLogger()
         self.clearLabels()
         
         self.pbnImport.clicked.connect(self.ImportFile)
@@ -38,9 +40,9 @@ class CKuchenDialog(QDialog, Ui_Dialog):
     
     def SaveFile(self):
         if self.mDM.SaveFile(aForMainTable=False):
-            self.labInfo.setText("File saved successfully")
+            self.mLogger.info("Save", "Mail list saved successfully.")
         else:
-            self.labInfo.setText("Error with File Save")
+            self.mLogger.error("Save", "Error saving mail list.")
             
             
     def ImportFile(self):
