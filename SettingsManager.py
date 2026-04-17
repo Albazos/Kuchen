@@ -7,7 +7,7 @@ class SettingsManager:
 
     _DEFAULTS = {
         "Klassen": {
-            "Dateiname": "StandartKlasse.csv",
+            "Dateiname": "StandardKlasse.csv",
         },
         "CakeData": {
             "Dateiname": "CakeData.csv",

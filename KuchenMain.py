@@ -46,12 +46,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         if self.mDM.LoadStandardFile():
             self.mHeaders = self.mDM.mMainHeaders[:]
             self._createRadioButtons()
-            self.FillTable()
+            self.SortColumn()
             self.labInfo.setText("File imported successfully")
         else:
             self.mHeaders = []
             self.labInfo.setText("No file selected")
-        self.SortColumn()
     
     def SaveFile(self):
         if self.mDM.SaveFile():
@@ -64,12 +63,28 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mKMM.exec()
     
     def SendMails(self):
-        lLD = LD.CLoginDialog(aMailData = self.mDM.createCompleteMailData())
+        lMailData = self.mDM.createCompleteMailData()
+        lRecipients = lMailData[0]
+        lCount = len(lRecipients)
+        if lCount == 0:
+            self.mLogger.warning("Mail", "No recipients found.")
+            return
+        lReply = QMessageBox.question(
+            self, "Mail senden",
+            f"Mail an {lCount} Empfänger senden?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if lReply != QMessageBox.StandardButton.Yes:
+            return
+        lLD = LD.CLoginDialog(aMailData=lMailData)
         lLD.exec() # type: ignore
-        if not lLD.getSendState():
-            self.mLogger.error("Mail", "Failed to send mails.")
-        else:
+        lState = lLD.getSendState()
+        if lState is None:
+            pass  # User cancelled, no message needed
+        elif lState:
             self.mLogger.info("Mail", "Mails sent successfully.")
+        else:
+            self.mLogger.error("Mail", "Failed to send mails.")
             
         
     def ImportFile(self):
@@ -163,7 +178,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn))
             self.mDM.sortData(self.mDM.getSortedColumnIndex())
-            self.FillTable(True)
+            lSearchText = self.leSearch.text()
+            if lSearchText.strip():
+                self.Search(lSearchText)
+            else:
+                self.FillTable(True)
 
     def CellEdited(self, aItem):
         lRow = aItem.row()
@@ -210,9 +229,10 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             lRbn.setProperty("headerKey", lHeader)
             if i == 0:
                 lRbn.setChecked(True)
-            lRbn.toggled.connect(self.SortColumn)
             self.verticalLayout.addWidget(lRbn)
             self.mRadioButtons.append(lRbn)
+        for lRbn in self.mRadioButtons:
+            lRbn.toggled.connect(self.SortColumn)
 
     def _showError(self, aTitle, aMessage):
         QMessageBox.critical(self, aTitle, aMessage)

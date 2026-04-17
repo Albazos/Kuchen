@@ -9,7 +9,7 @@ class CLoginDialog(QDialog, Ui_Dialog):
     def __init__(self,aMailData):
        super().__init__()
        self.setupUi(self)
-       self.mSendState = False
+       self.mSendState = None  # None=cancelled, True=sent, False=failed
        self.mMailData = aMailData
        
        self.pbnCancel.clicked.connect(self.CancelButton)
@@ -22,9 +22,11 @@ class CLoginDialog(QDialog, Ui_Dialog):
        
         lSettings = SM.SettingsManager()
         self.mISMM = ISM.IservMailManager(lLoginData[0],lLoginData[1],lSettings.getIServDomain())
-        if self.mISMM.sendMail(self.mMailData) == True:
+        if self.mISMM.sendMail(self.mMailData):
             self.mSendState = True
             self.close()
+        else:
+            self.mSendState = False
             
     def CancelButton(self):
         self.close()

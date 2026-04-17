@@ -125,7 +125,7 @@ Projektstruktur:
       |-- Settings/
       |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/
-          +-- StandartKlasse.csv  <- Klassenliste (leer, nur Header)
+          +-- StandardKlasse.csv  <- Klassenliste (leer, nur Header)
 
 
 Starten:
@@ -198,12 +198,12 @@ def copy_files():
     # Data/ - leere CSVs mit nur Header-Zeile erstellen
     with open(os.path.join(BUILD_DIR, "Data", "CakeData.csv"), "w", newline="") as f:
         f.write("Name,CakeCount,Hanuta,Waffel,Date\n")
-    with open(os.path.join(BUILD_DIR, "Data", "Klassen", "StandartKlasse.csv"), "w", newline="") as f:
+    with open(os.path.join(BUILD_DIR, "Data", "Klassen", "StandardKlasse.csv"), "w", newline="") as f:
         f.write("Name,Mail\n")
 
     # Data/Settings - Default settings.ini
     with open(os.path.join(BUILD_DIR, "Data", "Settings", "settings.ini"), "w", encoding="utf-8") as f:
-        f.write("[Klassen]\nDateiname = StandartKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
+        f.write("[Klassen]\nDateiname = StandardKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
 
     # __init__.py fuer src/ und ui/
     for pkg in ["src", "ui"]:
