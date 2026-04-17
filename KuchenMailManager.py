@@ -1,9 +1,8 @@
-from PySide6.QtWidgets import QApplication, QFileDialog, QDialog
+from PySide6.QtWidgets import QFileDialog, QDialog
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
 from UIMailsDialog_ui import Ui_Dialog
-import DataManager as DM
 
 class CKuchenDialog(QDialog, Ui_Dialog):
     
@@ -13,7 +12,6 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         
         self.mHeaders = ["Name", "Mail"]
         self.mDM = aDataManager
-        self.mISMM = None
         self.clearLabels()
         
         self.pbnImport.clicked.connect(self.ImportFile)
@@ -69,7 +67,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(self.mHeaders)
         lSData = self.mDM.getSortedMailData()
-        if lSData == None: 
+        if not lSData: 
             return
         for lRowID, lRowData in enumerate(lSData):  
             for lColID, lColData in enumerate(lRowData):
@@ -82,7 +80,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lData = self.mDM.getMailData()
         lData.append([""] * len(self.mHeaders))
         self.mDM.setMailData(lData)
-        self.mDM.setSortedMailData(self.mDM.getMailData())
+        self.mDM.setSortedMailData([row[:] for row in lData])
         self.FillTable()
     
     
@@ -90,8 +88,15 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lSelectedRows = sorted(set(index.row() for index in self.tableView.selectionModel().selectedIndexes()), reverse=True)
         if lSelectedRows:
             lSData = self.mDM.getSortedMailData()
+            lData = self.mDM.getMailData()
             for lRow in lSelectedRows:
+                lDeletedRow = lSData[lRow]
                 del lSData[lRow]
+                try:
+                    lData.remove(lDeletedRow)
+                except ValueError:
+                    pass
+            self.mDM.setMailData(lData)
             self.mDM.setSortedMailData(lSData)
             self.FillTable()
             self.labInfo.setText("Successfully removed selected row(s)")
@@ -126,8 +131,15 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lCol = aItem.column()
         lValue = aItem.data(Qt.DisplayRole)  # type: ignore
         lSData = self.mDM.getSortedMailData()
+        lOldValue = lSData[lRow][lCol]
         lSData[lRow][lCol] = lValue
         self.mDM.setSortedMailData(lSData)
+        lData = self.mDM.getMailData()
+        for lDataRow in lData:
+            if lDataRow[lCol] == lOldValue and all(lDataRow[i] == lSData[lRow][i] for i in range(len(lDataRow)) if i != lCol):
+                lDataRow[lCol] = lValue
+                break
+        self.mDM.setMailData(lData)
 
 
     def Search(self, aText):

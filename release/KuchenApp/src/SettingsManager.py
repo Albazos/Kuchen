@@ -12,6 +12,9 @@ class SettingsManager:
         "CakeData": {
             "Dateiname": "CakeData.csv",
         },
+        "IServ": {
+            "Domain": "wvss.de",
+        },
     }
 
     def __init__(self):
@@ -49,3 +52,9 @@ class SettingsManager:
 
     def setCakeDataDateiname(self, aDateiname):
         self.set("CakeData", "Dateiname", aDateiname)
+
+    def getIServDomain(self):
+        return self.get("IServ", "Domain")
+
+    def setIServDomain(self, aDomain):
+        self.set("IServ", "Domain", aDomain)

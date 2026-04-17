@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QDialog
 
 import IservMailManager as ISM
+import SettingsManager as SM
 from UILoginDialog_ui import Ui_Dialog
 
 class CLoginDialog(QDialog, Ui_Dialog):
@@ -19,7 +20,8 @@ class CLoginDialog(QDialog, Ui_Dialog):
         lLoginData.append(self.ledUser.text())
         lLoginData.append(self.ledPsw.text())
        
-        self.mISMM = ISM.IservMailManager(lLoginData[0],lLoginData[1],"wvss.de")
+        lSettings = SM.SettingsManager()
+        self.mISMM = ISM.IservMailManager(lLoginData[0],lLoginData[1],lSettings.getIServDomain())
         if self.mISMM.sendMail(self.mMailData) == True:
             self.mSendState = True
             self.close()

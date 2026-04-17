@@ -22,11 +22,13 @@ Projektstruktur:
   |-- assets/
   |   +-- kuchen_icon.svg      <- App-Icon
   |-- src/
+  |   |-- AppLogger.py         <- Singleton Logger (Signale fuer Fehlermeldungen)
   |   |-- DataManager.py       <- Datenverwaltung (CSV lesen/schreiben)
   |   |-- KuchenMailManager.py <- Dialog fuer Mail-Liste
   |   |-- LoginDialog.py       <- Login-Dialog fuer IServ
   |   |-- IservMailManager.py  <- Mail-Versand ueber IServ API
-  |   +-- IServAPIEdited_standalone.py  <- IServ API (nur stdlib, kein pip)
+  |   |-- IServAPIEdited_standalone.py  <- IServ API (nur stdlib, kein pip)
+  |   +-- SettingsManager.py   <- Einstellungsverwaltung (INI-Datei)
   |-- ui/
   |   |-- UIMainWindow_ui.py
   |   |-- UIMailsDialog_ui.py

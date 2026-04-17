@@ -1,12 +1,13 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
 from src import DataManager as DM
 from src import KuchenMailManager as KMM
 from src import LoginDialog as LD
+from src import AppLogger as AL
 from ui.UIMainWindow_ui import Ui_MainWindow  
 
 
@@ -19,7 +20,10 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mHeaders = ["Name", "CakeCount","Hanuta","Waffel", "Date"]
         self.mDM = DM.DataManager()
         self.mKMM = None
-        self.mISMM = None
+        
+        self.mLogger = AL.AppLogger()
+        self.mLogger.errorOccurred.connect(self._showError)
+        self.mLogger.warningOccurred.connect(self._showWarning)
         
         self.clearLabels()
         
@@ -60,12 +64,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     def ShowMailListDialog(self):
         self.mKMM = KMM.CKuchenDialog(aDataManager=self.mDM)
         self.mKMM.exec()
-        self.mDM.getData()
     
     def SendMails(self):
         lLD = LD.CLoginDialog(aMailData = self.mDM.createCompleteMailData())
         lLD.exec() # type: ignore
-        if lLD.getSendState() == False:
+        if not lLD.getSendState():
             self.labInfo.setText("ERROR with Mail")
         else:
             self.labInfo.setText("Mails sent")
@@ -98,7 +101,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(self.mHeaders)
         lSData = self.mDM.getSortedData()
-        if lSData == None: 
+        if not lSData: 
             return
         for lRowID, lRowData in enumerate(lSData):  
             for lColID, lColData in enumerate(lRowData):
@@ -111,7 +114,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lData = self.mDM.getData()
         lData.append([""] * len(self.mHeaders))
         self.mDM.setData(lData)
-        self.mDM.setSortedData(self.mDM.getData())
+        self.mDM.setSortedData([row[:] for row in lData])
         self.FillTable()
     
     
@@ -119,8 +122,15 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lSelectedRows = sorted(set(index.row() for index in self.tableView.selectionModel().selectedIndexes()), reverse=True)
         if lSelectedRows:
             lSData = self.mDM.getSortedData()
+            lData = self.mDM.getData()
             for lRow in lSelectedRows:
+                lDeletedRow = lSData[lRow]
                 del lSData[lRow]
+                try:
+                    lData.remove(lDeletedRow)
+                except ValueError:
+                    pass
+            self.mDM.setData(lData)
             self.mDM.setSortedData(lSData)
             self.FillTable()
             self.labInfo.setText("Successfully removed selected row(s)")
@@ -171,8 +181,15 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lCol = aItem.column()
         lValue = aItem.data(Qt.DisplayRole)  # type: ignore
         lSData = self.mDM.getSortedData()
+        lOldValue = lSData[lRow][lCol]
         lSData[lRow][lCol] = lValue
         self.mDM.setSortedData(lSData)
+        lData = self.mDM.getData()
+        for lDataRow in lData:
+            if lDataRow[lCol] == lOldValue and all(lDataRow[i] == lSData[lRow][i] for i in range(len(lDataRow)) if i != lCol):
+                lDataRow[lCol] = lValue
+                break
+        self.mDM.setData(lData)
 
 
     def Search(self, aText):
@@ -197,6 +214,12 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                 self.rbnName.isChecked() or
                 self.rbnWaffel.isChecked() or
                 self.rbnDate.isChecked())
+
+    def _showError(self, aTitle, aMessage):
+        QMessageBox.critical(self, aTitle, aMessage)
+
+    def _showWarning(self, aTitle, aMessage):
+        QMessageBox.warning(self, aTitle, aMessage)
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

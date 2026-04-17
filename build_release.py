@@ -29,6 +29,7 @@ SRC_FILES = [
     "KuchenMailManager.py",
     "LoginDialog.py",
     "SettingsManager.py",
+    "AppLogger.py",
 ]
 
 # UI-Quelldateien (.ui -> _ui.py) - werden vor dem Kopieren kompiliert
@@ -59,6 +60,7 @@ IMPORT_REPLACEMENTS = {
         ("import DataManager as DM", "from src import DataManager as DM"),
         ("import KuchenMailManager as KMM", "from src import KuchenMailManager as KMM"),
         ("import LoginDialog as LD", "from src import LoginDialog as LD"),
+        ("import AppLogger as AL", "from src import AppLogger as AL"),
         ("from UIMainWindow_ui import Ui_MainWindow", "from ui.UIMainWindow_ui import Ui_MainWindow"),
         # Icon-Pfad anpassen
         ('"kuchen_icon.svg"', '"assets", "kuchen_icon.svg"'),
@@ -69,13 +71,16 @@ IMPORT_REPLACEMENTS = {
     ],
     "LoginDialog.py": [
         ("import IservMailManager as ISM", "from src import IservMailManager as ISM"),
+        ("import SettingsManager as SM", "from src import SettingsManager as SM"),
         ("from UILoginDialog_ui import Ui_Dialog", "from ui.UILoginDialog_ui import Ui_Dialog"),
     ],
     "IservMailManager.py": [
         ("from IServAPIEdited_standalone import IServAPI", "from src.IServAPIEdited_standalone import IServAPI"),
+        ("import AppLogger as AL", "from src import AppLogger as AL"),
     ],
     "DataManager.py": [
         ("import SettingsManager as SM", "from src import SettingsManager as SM"),
+        ("import AppLogger as AL", "from src import AppLogger as AL"),
     ],
 }
 
@@ -104,11 +109,13 @@ Projektstruktur:
   |-- assets/
   |   +-- kuchen_icon.svg      <- App-Icon
   |-- src/
+  |   |-- AppLogger.py         <- Singleton Logger (Signale fuer Fehlermeldungen)
   |   |-- DataManager.py       <- Datenverwaltung (CSV lesen/schreiben)
   |   |-- KuchenMailManager.py <- Dialog fuer Mail-Liste
   |   |-- LoginDialog.py       <- Login-Dialog fuer IServ
   |   |-- IservMailManager.py  <- Mail-Versand ueber IServ API
-  |   +-- IServAPIEdited_standalone.py  <- IServ API (nur stdlib, kein pip)
+  |   |-- IServAPIEdited_standalone.py  <- IServ API (nur stdlib, kein pip)
+  |   +-- SettingsManager.py   <- Einstellungsverwaltung (INI-Datei)
   |-- ui/
   |   |-- UIMainWindow_ui.py
   |   |-- UIMailsDialog_ui.py
@@ -196,7 +203,7 @@ def copy_files():
 
     # Data/Settings - Default settings.ini
     with open(os.path.join(BUILD_DIR, "Data", "Settings", "settings.ini"), "w", encoding="utf-8") as f:
-        f.write("[Klassen]\nDateiname = StandartKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n")
+        f.write("[Klassen]\nDateiname = StandartKlasse.csv\n\n[CakeData]\nDateiname = CakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
 
     # __init__.py fuer src/ und ui/
     for pkg in ["src", "ui"]:

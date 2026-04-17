@@ -3,6 +3,7 @@ import csv
 import os
 import html
 from src import SettingsManager as SM
+from src import AppLogger as AL
 
 class DataManager():
     
@@ -14,9 +15,11 @@ class DataManager():
         self.mSortedData = []
         self.mSortedMailColumnIndex = None
         self.mSortedColumnIndex = None
-        self.mHeaders = []
+        self.mMainHeaders = []
+        self.mMailHeaders = []
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self.mSettings = SM.SettingsManager()
+        self.mLogger = AL.AppLogger()
     
     def setSortedData(self, aData):
         self.mSortedData = aData
@@ -82,11 +85,11 @@ class DataManager():
                 lReader = csv.reader(csvfile, dialect=lDialect)
                 if aForMainTable:
                     self.setData(list(lReader))              
-                    self.mHeaders = self.getData()[0]
+                    self.mMainHeaders = self.getData()[0]
                     del self.getData()[0]
                 else:
                     self.setMailData(list(lReader))              
-                    self.mHeaders = self.getMailData()[0]
+                    self.mMailHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
             if aForMainTable:            
                 self.setSortedData([row[:] for row in self.getData()])
@@ -94,20 +97,20 @@ class DataManager():
                 self.setSortedMailData([row[:] for row in self.getMailData()])
             return True  
         except (OSError, csv.Error) as e:
-            print(f"Error loading file: {e}")
+            self.mLogger.error("Datei laden", f"Fehler beim Laden der Datei: {e}")
             return False
     
     def sortData(self, aSortColumnIndex, aForMain = True):
-            if aForMain:
-                lSData = self.getSortedData()
-            else:
-                lSData = self.getSortedMailData()
-            if len(lSData) > 1:
-                lSData.sort(key=lambda x: x[aSortColumnIndex])
-            if aForMain:
-                self.setSortedData(lSData) 
-            else:
-                self.setSortedMailData(lSData)
+        if aForMain:
+            lSData = self.getSortedData()
+        else:
+            lSData = self.getSortedMailData()
+        if len(lSData) > 1:
+            lSData.sort(key=lambda x: x[aSortColumnIndex])
+        if aForMain:
+            self.setSortedData(lSData) 
+        else:
+            self.setSortedMailData(lSData)
     
     def SaveFile(self, aForMainTable = True):
         if aForMainTable:
@@ -119,14 +122,15 @@ class DataManager():
         try:
             with open(lFilePath, 'w', newline='') as csvfile:
                 lWriter = csv.writer(csvfile, delimiter=',')
-                lWriter.writerow(self.mHeaders)
                 if aForMainTable:
+                    lWriter.writerow(self.mMainHeaders)
                     lWriter.writerows(self.getData())
                 else:
-                    lWriter.writerows(self.getSortedMailData())
+                    lWriter.writerow(self.mMailHeaders)
+                    lWriter.writerows(self.getMailData())
             return True       
         except OSError as e:
-            print(f"Error saving file: {e}")
+            self.mLogger.error("Datei speichern", f"Fehler beim Speichern: {e}")
             return False
         
     def ImportFile(self, aPath, aForMainTable = True):
@@ -138,16 +142,16 @@ class DataManager():
                 lReader = csv.reader(csvfile, dialect=lDialect)
                 if aForMainTable:
                     self.setData(list(lReader))          
-                    self.mHeaders = self.getData()[0]
+                    self.mMainHeaders = self.getData()[0]
                     del self.getData()[0]
                     self.setSortedData([row[:] for row in self.getData()])
                 else:
                     self.setMailData(list(lReader))          
-                    self.mHeaders = self.getMailData()[0]
+                    self.mMailHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
                     self.setSortedMailData([row[:] for row in self.getMailData()])
         except (OSError, csv.Error) as e:
-            print(f"Error importing file: {e}")
+            self.mLogger.error("Datei importieren", f"Fehler beim Importieren: {e}")
     
     
     def createCompleteMailData(self):
@@ -156,8 +160,7 @@ class DataManager():
         for lMail in self.mMailData:
             lMails.append(lMail[1])
         lCompleteMailData.append(lMails)
-        lHeaders = ["Name", "CakeCount","Hanuta","Waffel", "Date"]
-        lHtmlBody = self.createHtmlDataString(aHeaders=lHeaders)
+        lHtmlBody = self.createHtmlDataString(aHeaders=self.mMainHeaders)
         lCompleteMailData.append(lHtmlBody)
         self.setCompleteMailData(lCompleteMailData)
         return lCompleteMailData
@@ -186,5 +189,3 @@ class DataManager():
 
         lHtml += "  </tbody>\n</table>"
         return lHtml
-
-        return html
