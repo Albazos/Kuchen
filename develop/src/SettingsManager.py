@@ -1,5 +1,12 @@
 import configparser
 import os
+import sys
+
+
+def _get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class SettingsManager:
@@ -18,7 +25,7 @@ class SettingsManager:
     }
 
     def __init__(self):
-        self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self._base_dir = _get_base_dir()
         self._settings_dir = os.path.join(self._base_dir, "Data", "Settings")
         self._settings_path = os.path.join(self._settings_dir, "settings.ini")
         self._config = configparser.ConfigParser()

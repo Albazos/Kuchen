@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFileDialog, QDialog, QRadioButton
+from PySide6.QtWidgets import QFileDialog, QDialog, QRadioButton, QButtonGroup, QHBoxLayout
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
@@ -14,6 +14,8 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         self.mDM = aDataManager
         self.mLogger = AL.AppLogger()
         self.mRadioButtons = []
+        self.mRbnAscending = None
+        self.mRbnDescending = None
         self.clearLabels()
         
         self.pbnImport.clicked.connect(self.ImportFile)
@@ -115,6 +117,9 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         self.close()
 
     
+    def _isDescending(self):
+        return self.mRbnDescending is not None and self.mRbnDescending.isChecked()
+
     def SortColumn(self):
         lSortColumn = None
         for lRbn in self.mRadioButtons:
@@ -124,7 +129,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
 
         if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn), aForMain=False)
-            self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aForMain=False)
+            self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aReverse=self._isDescending(), aForMain=False)
             lSearchText = self.leSearch.text()
             if lSearchText.strip():
                 self.Search(lSearchText)
@@ -154,6 +159,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
                 self.mDM.setSortedMailData(lFiltered)
             else:
                 self.mDM.setSortedMailData([row[:] for row in self.mDM.getMailData()])
+            self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aReverse=self._isDescending(), aForMain=False)
         else:
             if aText.strip():  
                self.mDM.setSortedMailData([lRow for lRow in self.mDM.getMailData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
@@ -171,6 +177,14 @@ class CKuchenDialog(QDialog, Ui_Dialog):
             self.verticalLayout.removeWidget(lRbn)
             lRbn.deleteLater()
         self.mRadioButtons.clear()
+
+        if self.mRbnAscending is not None:
+            self.mRbnAscending.deleteLater()
+            self.mRbnAscending = None
+        if self.mRbnDescending is not None:
+            self.mRbnDescending.deleteLater()
+            self.mRbnDescending = None
+
         for i, lHeader in enumerate(self.mHeaders):
             lRbn = QRadioButton(lHeader)
             lRbn.setProperty("headerKey", lHeader)
@@ -178,5 +192,19 @@ class CKuchenDialog(QDialog, Ui_Dialog):
                 lRbn.setChecked(True)
             self.verticalLayout.addWidget(lRbn)
             self.mRadioButtons.append(lRbn)
+
+        lOrderLayout = QHBoxLayout()
+        self.mRbnAscending = QRadioButton("Ascending")
+        self.mRbnDescending = QRadioButton("Descending")
+        self.mRbnAscending.setChecked(True)
+        lOrderGroup = QButtonGroup(self)
+        lOrderGroup.addButton(self.mRbnAscending)
+        lOrderGroup.addButton(self.mRbnDescending)
+        lOrderLayout.addWidget(self.mRbnAscending)
+        lOrderLayout.addWidget(self.mRbnDescending)
+        self.verticalLayout.addLayout(lOrderLayout)
+
         for lRbn in self.mRadioButtons:
             lRbn.toggled.connect(self.SortColumn)
+        self.mRbnAscending.toggled.connect(self.SortColumn)
+        self.mRbnDescending.toggled.connect(self.SortColumn)

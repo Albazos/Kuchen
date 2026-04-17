@@ -1,9 +1,18 @@
 #works with the Data and holds it
 import csv
 import os
+import sys
+import shutil
 import html
 from . import SettingsManager as SM
 from . import AppLogger as AL
+
+
+def _get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class DataManager():
     
@@ -17,7 +26,8 @@ class DataManager():
         self.mSortedColumnIndex = None
         self.mMainHeaders = []
         self.mMailHeaders = []
-        self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.mImportedFilename = None
+        self._base_dir = _get_base_dir()
         self.mSettings = SM.SettingsManager()
         self.mLogger = AL.AppLogger()
     
@@ -107,19 +117,23 @@ class DataManager():
             while len(lRow) < aHeaderLen:
                 lRow.append("")
     
-    def sortData(self, aSortColumnIndex, aForMain = True):
+    def sortData(self, aSortColumnIndex, aReverse=False, aForMain=True):
         if aForMain:
             lSData = self.getSortedData()
         else:
             lSData = self.getSortedMailData()
         if len(lSData) > 1:
-            lSData.sort(key=lambda x: x[aSortColumnIndex])
+            lSData.sort(key=lambda x: x[aSortColumnIndex], reverse=aReverse)
         if aForMain:
             self.setSortedData(lSData) 
         else:
             self.setSortedMailData(lSData)
     
     def SaveFile(self, aForMainTable = True):
+        if aForMainTable and self.mImportedFilename:
+            self.mSettings.setCakeDataDateiname(self.mImportedFilename)
+            self.mSettings.save()
+            self.mImportedFilename = None
         if aForMainTable:
             lCakeDatei = self.mSettings.getCakeDataDateiname()
             lFilePath = os.path.join(self._base_dir, "Data", lCakeDatei)
@@ -153,14 +167,17 @@ class DataManager():
                     del self.getData()[0]
                     self._padRows(self.getData(), len(self.mMainHeaders))
                     self.setSortedData([row[:] for row in self.getData()])
+                    self.mImportedFilename = os.path.basename(aPath)
                 else:
                     self.setMailData(list(lReader))          
                     self.mMailHeaders = self.getMailData()[0]
                     del self.getMailData()[0]
                     self._padRows(self.getMailData(), len(self.mMailHeaders))
                     self.setSortedMailData([row[:] for row in self.getMailData()])
+            return True
         except (OSError, csv.Error) as e:
             self.mLogger.error("Import File", f"Error importing file: {e}")
+            return False
     
     
     def createCompleteMailData(self):

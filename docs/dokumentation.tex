@@ -1,0 +1,628 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- Pakete ---
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+% --- Farben ---
+\definecolor{codeblue}{RGB}{0,102,204}
+\definecolor{codegray}{RGB}{100,100,100}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{backgray}{RGB}{245,245,245}
+
+% --- Listings-Stil ---
+\lstset{
+    backgroundcolor=\color{backgray},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{codegray},
+    numbers=left,
+    numberstyle=\tiny\color{codegray},
+    numbersep=8pt,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+}
+
+% --- Header/Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{KuchenApp -- Projektdokumentation}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Hyperlinks ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=codeblue,
+    urlcolor=codeblue,
+}
+
+% =====================================================================
+\begin{document}
+
+% --- Titelseite ---
+\begin{titlepage}
+\centering
+\vspace*{3cm}
+{\Huge\textbf{KuchenApp}\\[0.5cm]}
+{\LARGE Projektdokumentation}\\[2cm]
+{\Large Desktop-Anwendung zur Verwaltung von\\Kuchen-Listen und IServ-Mail-Versand}\\[3cm]
+{\large Erstellt mit PySide6 (Qt for Python)}\\[1cm]
+{\large Python 3.10+}\\[3cm]
+{\large\today}
+\vfill
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Projektübersicht}
+
+\textbf{KuchenApp} ist eine Desktop-Anwendung, die im Rahmen eines Schulprojekts
+(Berufsschule, Fachinformatiker Anwendungsentwicklung) entwickelt wurde. Die Anwendung
+dient zur Verwaltung einer Kuchen-Liste für eine Schulklasse und ermöglicht den
+automatisierten Versand von Erinnerungs-E-Mails über das IServ-System.
+
+\subsection{Funktionsumfang}
+\begin{itemize}
+    \item CSV-Dateien importieren, bearbeiten und speichern
+    \item Dynamische Tabellendarstellung mit Sortier- und Suchfunktion
+    \item Aufsteigende und absteigende Sortierung per Radio-Buttons
+    \item Verwaltung einer Empfänger-Mailliste (separater Dialog)
+    \item Automatische HTML-Tabellengenerierung für E-Mail-Inhalte
+    \item E-Mail-Versand über IServ-SMTP mit Login-Dialog
+    \item INI-basierte Einstellungsverwaltung
+    \item Standalone-Build für Linux und Windows (PyInstaller)
+    \item CI/CD über GitHub Actions
+\end{itemize}
+
+\subsection{Technologie-Stack}
+\begin{table}[h!]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Komponente} & \textbf{Technologie} \\
+\midrule
+Programmiersprache & Python 3.10+ \\
+GUI-Framework & PySide6 (Qt 6 for Python) \\
+UI-Design & Qt Designer (.ui-Dateien) \\
+Datenpersistenz & CSV (comma-separated values) \\
+Einstellungen & INI-Dateien (configparser) \\
+E-Mail-Versand & smtplib (SMTP\_SSL) \\
+Build/Packaging & PyInstaller \\
+CI/CD & GitHub Actions \\
+\bottomrule
+\end{tabular}
+\caption{Verwendete Technologien}
+\end{table}
+
+
+% =====================================================================
+\section{Projektstruktur}
+
+Das Projekt folgt einer klaren Trennung zwischen Entwicklungs- und Release-Code.
+
+\subsection{Verzeichnisstruktur}
+
+\begin{lstlisting}[language={}, caption={Gesamtstruktur}]
+Kuchen/
+|-- build_release.py          # Build-Skript
+|-- requirements.txt          # Python-Abhängigkeiten
+|-- .github/workflows/        # CI/CD Pipeline
+|   +-- build_release.yml
+|-- develop/                  # Entwicklungsumgebung
+|   |-- KuchenMain.py         # Hauptprogramm (Entry Point)
+|   |-- src/                  # Quellcode-Module
+|   |   |-- __init__.py
+|   |   |-- AppLogger.py
+|   |   |-- DataManager.py
+|   |   |-- IServAPIEdited_standalone.py
+|   |   |-- IservMailManager.py
+|   |   |-- KuchenMailManager.py
+|   |   |-- LoginDialog.py
+|   |   +-- SettingsManager.py
+|   |-- ui/                   # UI-Dateien
+|   |   |-- __init__.py
+|   |   |-- UIMainWindow.ui / _ui.py
+|   |   |-- UIMailsDialog.ui / _ui.py
+|   |   +-- UILoginDialog.ui / _ui.py
+|   |-- assets/
+|   |   +-- kuchen_icon.svg
+|   +-- Data/
+|       |-- CakeData.csv
+|       |-- StandardCakeData.csv
+|       |-- Settings/settings.ini
+|       +-- Klassen/EITB23A.csv
++-- release/                  # Generierte Releases
+    |-- KuchenApp/            # Source-Bundle
+    |-- KuchenApp.zip
+    |-- KuchenApp_standalone_linux/
+    |-- KuchenApp_standalone_linux.zip
+    |-- KuchenApp_standalone_windows/
+    +-- KuchenApp_standalone_windows.zip
+\end{lstlisting}
+
+\subsection{Trennung: develop vs. release}
+
+\begin{description}
+    \item[develop/] Enthält den vollständigen Quellcode, .ui-Designdateien
+        und Testdaten. Hier wird aktiv entwickelt.
+    \item[release/] Wird durch \texttt{build\_release.py} automatisch generiert.
+        Enthält nur die für den Endbenutzer nötigen Dateien. Die CSV-Dateien
+        werden mit leeren Standard-Headern ausgeliefert.
+\end{description}
+
+
+% =====================================================================
+\section{Architektur und Entwurfsmuster}
+
+\subsection{Gesamtarchitektur}
+
+Die Anwendung folgt einer \textbf{Schichtenarchitektur}:
+
+\begin{enumerate}
+    \item \textbf{Präsentationsschicht} -- GUI-Klassen (\texttt{CMainWindow},
+        \texttt{CKuchenDialog}, \texttt{CLoginDialog}), Qt-UI-Dateien
+    \item \textbf{Logikschicht} -- Datenverarbeitung (\texttt{DataManager}),
+        Einstellungen (\texttt{SettingsManager}), Mail-Versand
+        (\texttt{IservMailManager})
+    \item \textbf{Datenzugriffsschicht} -- CSV-Dateien, INI-Konfiguration,
+        IServ-SMTP-API
+\end{enumerate}
+
+\subsection{Verwendete Entwurfsmuster}
+
+\subsubsection{Singleton-Pattern (AppLogger)}
+
+Der \texttt{AppLogger} implementiert das \textbf{Singleton-Pattern} über Pythons
+\texttt{\_\_new\_\_}-Methode. Damit existiert während der gesamten Laufzeit
+exakt eine Logger-Instanz.
+
+\textbf{Fachliche Begründung:} Alle Klassen sollen Fehlermeldungen an die GUI
+weiterleiten können, ohne eine Referenz auf das Hauptfenster zu benötigen. Der
+Singleton stellt sicher, dass alle \texttt{AppLogger()}-Aufrufe dieselbe Instanz
+zurückgeben und somit die gleichen Qt-Signale nutzen.
+
+\begin{lstlisting}[language=Python, caption={Singleton-Implementierung}]
+class AppLogger(QObject):
+    errorOccurred = Signal(str, str)
+    warningOccurred = Signal(str, str)
+    infoOccurred = Signal(str, str)
+
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        if not hasattr(self, '_initialized'):
+            super().__init__()
+            self._initialized = True
+\end{lstlisting}
+
+\subsubsection{Observer-Pattern (Qt Signal/Slot)}
+
+Die Kommunikation zwischen den Schichten erfolgt über das
+\textbf{Observer-Pattern}, implementiert durch Qt's Signal/Slot-Mechanismus.
+
+\begin{itemize}
+    \item \texttt{AppLogger} emittiert Signale (\texttt{errorOccurred},
+        \texttt{warningOccurred}, \texttt{infoOccurred})
+    \item \texttt{CMainWindow} verbindet diese mit Slot-Methoden, die
+        \texttt{QMessageBox}-Dialoge anzeigen
+    \item \texttt{QStandardItemModel.dataChanged} benachrichtigt bei
+        Zellenänderungen in der Tabelle
+\end{itemize}
+
+\textbf{Fachliche Begründung:} Lose Kopplung -- der \texttt{DataManager} und
+\texttt{IservMailManager} kennen die GUI nicht, sondern kommunizieren über den
+\texttt{AppLogger}. Dies ermöglicht eine saubere Trennung der Schichten.
+
+\subsubsection{Model-View-Pattern (Qt MVC)}
+
+Die Tabellendarstellung nutzt Qt's \textbf{Model-View}-Architektur:
+
+\begin{itemize}
+    \item \textbf{Model:} \texttt{QStandardItemModel} -- hält die Tabelleneinträge
+    \item \textbf{View:} \texttt{QTableView} -- zeigt die Daten an
+    \item \textbf{Controller:} Die jeweilige Window-Klasse vermittelt zwischen
+        \texttt{DataManager} und dem Model
+\end{itemize}
+
+
+% =====================================================================
+\section{Module im Detail}
+
+\subsection{KuchenMain.py -- Hauptfenster}
+
+\texttt{CMainWindow} erbt von \texttt{QMainWindow} und \texttt{Ui\_MainWindow}
+(Multiple Inheritance, empfohlener Qt-Ansatz). Es ist der \textbf{Entry Point}
+der Anwendung.
+
+\textbf{Schlüsselfunktionen:}
+
+\begin{description}[style=nextline]
+    \item[\texttt{\_createRadioButtons()}]
+        Erzeugt dynamisch Radio-Buttons für jede CSV-Spalte (Sortierung)
+        sowie ein Ascending/Descending-Paar. Verwendet \texttt{QButtonGroup}
+        für die Sortierrichtung.
+    \item[\texttt{SortColumn()}]
+        Liest den ausgewählten Radio-Button aus, bestimmt den Spaltenindex
+        und ruft \texttt{DataManager.sortData()} mit dem
+        \texttt{aReverse}-Parameter auf. Berücksichtigt aktive Suchfilter.
+    \item[\texttt{Search(aText)}]
+        Filtert die Originaldaten (\texttt{mData}) nach dem Suchbegriff.
+        Ist ein Sortier-Radio-Button aktiv, wird nur in der entsprechenden
+        Spalte gesucht. Ansonsten: Volltextsuche über alle Spalten.
+        Nach dem Filtern wird die Sortierung erneut angewandt.
+    \item[\texttt{CellEdited(aItem)}]
+        Synchronisiert Änderungen in der Tabelle zurück in \texttt{mSortedData}
+        \emph{und} \texttt{mData}. Sucht die Original-Zeile anhand aller
+        anderen Spaltenwerte (da die Reihenfolge abweichen kann).
+    \item[\texttt{FillTable()}]
+        Löscht das \texttt{QStandardItemModel}, setzt Header und füllt die
+        Tabelle aus \texttt{mSortedData}. Wird nach jeder Datenänderung
+        aufgerufen.
+    \item[\texttt{SendMails()}]
+        Zeigt einen Bestätigungsdialog mit der Empfängeranzahl, öffnet den
+        Login-Dialog und wertet den Tri-State-Rückgabewert aus
+        (\texttt{None}=abgebrochen, \texttt{True}=gesendet,
+        \texttt{False}=fehlgeschlagen).
+    \item[\texttt{ImportFile()}]
+        Öffnet einen \texttt{QFileDialog}, importiert die CSV und
+        aktualisiert die Radio-Buttons dynamisch anhand der neuen Header.
+\end{description}
+
+\textbf{PyInstaller-Kompatibilität:} Im \texttt{\_\_main\_\_}-Block wird
+\texttt{sys.frozen} geprüft, um den Icon-Pfad korrekt aufzulösen
+(\texttt{sys.\_MEIPASS} im Bundle vs. \texttt{\_\_file\_\_} im
+Entwicklungsmodus).
+
+
+\subsection{DataManager.py -- Datenverwaltung}
+
+Der \texttt{DataManager} ist die zentrale Klasse für alle Datenoperationen.
+Er verwaltet zwei unabhängige Datensätze:
+
+\begin{itemize}
+    \item \textbf{Haupttabelle} (Kuchen-Daten): \texttt{mData}, \texttt{mSortedData},
+        \texttt{mMainHeaders}
+    \item \textbf{Mail-Tabelle} (Empfänger): \texttt{mMailData}, \texttt{mSortedMailData},
+        \texttt{mMailHeaders}
+\end{itemize}
+
+\textbf{Duale Datenhaltung:} \texttt{mData} enthält immer die \emph{unsortierte}
+Originaldaten. \texttt{mSortedData} ist eine gefilterte/sortierte Kopie, die
+in der Tabelle angezeigt wird. Dies ermöglicht das Zurücksetzen von
+Sortierung und Suche.
+
+\textbf{Schlüsselfunktionen:}
+
+\begin{description}[style=nextline]
+    \item[\texttt{LoadStandardFile(aForMainTable)}]
+        Lädt die CSV-Datei, deren Name in den Settings steht. Verwendet
+        \texttt{csv.Sniffer} zur automatischen Dialekt-Erkennung (Trennzeichen,
+        Quoting). Extrahiert die erste Zeile als Header.
+    \item[\texttt{ImportFile(aPath)}]
+        Importiert eine externe CSV. Speichert den Dateinamen in
+        \texttt{mImportedFilename}. Beim nächsten \texttt{SaveFile()} wird
+        dieser Name in die Settings übernommen, sodass die importierte Datei
+        beim nächsten Start automatisch geladen wird.
+    \item[\texttt{SaveFile(aForMainTable)}]
+        Speichert die Daten als CSV. Wurde zuvor eine Datei importiert,
+        aktualisiert \texttt{SaveFile} automatisch die Settings mit dem
+        neuen Dateinamen.
+    \item[\texttt{sortData(aSortColumnIndex, aReverse, aForMain)}]
+        Sortiert \texttt{mSortedData} (oder \texttt{mSortedMailData}) nach
+        der gegebenen Spalte. Der Parameter \texttt{aReverse} steuert die
+        Richtung (aufsteigend/absteigend).
+    \item[\texttt{\_padRows(aData, aHeaderLen)}]
+        Füllt Datenzeilen mit leeren Strings auf, falls sie weniger Spalten
+        als der Header haben. Dies erhöht die Robustheit beim Import
+        unvollständiger CSVs.
+    \item[\texttt{createCompleteMailData()}]
+        Bereitet die Mail-Daten auf: extrahiert E-Mail-Adressen und generiert
+        einen HTML-String der Kuchen-Tabelle für den E-Mail-Body.
+    \item[\texttt{createHtmlDataString()}]
+        Erzeugt eine formatierte HTML-Tabelle mit Inline-CSS. Verwendet
+        \texttt{html.escape()} zur Vermeidung von XSS-Schwachstellen.
+\end{description}
+
+\textbf{PyInstaller-Kompatibilität:} Die Funktion \texttt{\_get\_base\_dir()}
+gibt bei \texttt{sys.frozen == True} das Verzeichnis der ausführbaren Datei
+zurück, ansonsten das Projektverzeichnis.
+
+
+\subsection{SettingsManager.py -- Einstellungsverwaltung}
+
+Verwaltet die Anwendungseinstellungen in einer INI-Datei
+(\texttt{Data/Settings/settings.ini}) über Pythons \texttt{configparser}-Modul.
+
+\textbf{Konfigurationsstruktur:}
+
+\begin{lstlisting}[language={}, caption={settings.ini}]
+[Klassen]
+Dateiname = StandardKlasse.csv
+
+[CakeData]
+Dateiname = StandardCakeData.csv
+
+[IServ]
+Domain = wvss.de
+\end{lstlisting}
+
+\textbf{Default-Werte:} Die Klasse definiert ein \texttt{\_DEFAULTS}-Dictionary.
+Beim Instanziieren werden zuerst die Defaults geladen, dann die INI-Datei
+darübergelegt. So sind immer Fallback-Werte vorhanden.
+
+
+\subsection{AppLogger.py -- Singleton-Logger}
+
+Implementiert das Singleton-Pattern (siehe Abschnitt 3.2.1). Stellt drei
+Schweregrade bereit:
+
+\begin{itemize}
+    \item \texttt{error(aTitle, aMessage)} -- Kritische Fehler (roter Dialog)
+    \item \texttt{warning(aTitle, aMessage)} -- Warnungen (gelber Dialog)
+    \item \texttt{info(aTitle, aMessage)} -- Informationen (blauer Dialog)
+\end{itemize}
+
+Jeder Aufruf emittiert ein Qt-Signal mit Titel und Nachricht. Die GUI
+verbindet diese Signale mit \texttt{QMessageBox.critical()},
+\texttt{QMessageBox.warning()} bzw. \texttt{QMessageBox.information()}.
+
+
+\subsection{KuchenMailManager.py -- Mail-Listen-Dialog}
+
+\texttt{CKuchenDialog} ist ein modaler Dialog (\texttt{QDialog}) zur Verwaltung
+der Empfänger-Mailliste. Er teilt sich den \texttt{DataManager} mit dem
+Hauptfenster und arbeitet auf den Mail-Daten (\texttt{mMailData}).
+
+Die Funktionalität ist analog zum Hauptfenster: dynamische Radio-Buttons,
+Sortierung (ascending/descending), Suche, Import, Speichern, Zeilen
+hinzufügen/löschen.
+
+
+\subsection{LoginDialog.py -- IServ-Login}
+
+\texttt{CLoginDialog} ist ein modaler Dialog für die SMTP-Authentifizierung.
+
+\textbf{Tri-State-Logik:}
+\begin{itemize}
+    \item \texttt{mSendState = None} -- Benutzer hat abgebrochen
+    \item \texttt{mSendState = True} -- Mails erfolgreich gesendet
+    \item \texttt{mSendState = False} -- Fehler beim Senden (Dialog bleibt offen)
+\end{itemize}
+
+
+\subsection{IservMailManager.py -- Mail-Versand}
+
+Erstellt eine Verbindung zur IServ-API und sendet E-Mails über SMTP\_SSL.
+Das Passwort wird im \texttt{finally}-Block auf \texttt{None} gesetzt,
+um es nicht unnötig im Speicher zu halten (\textbf{Security Best Practice}).
+
+Fehlerbehandlung fängt spezifische Exceptions:
+\texttt{OSError}, \texttt{smtplib.SMTPException}, \texttt{ValueError},
+\texttt{ConnectionError}.
+
+
+\subsection{IServAPIEdited\_standalone.py -- IServ-API}
+
+Eine angepasste Version der IServ-API, die \textbf{ausschließlich} die
+Python-Standardbibliothek verwendet (kein \texttt{pip install} nötig).
+
+Ersetzt externe Abhängigkeiten:
+\begin{itemize}
+    \item \texttt{requests} $\rightarrow$ \texttt{urllib.request}
+    \item \texttt{beautifulsoup4} $\rightarrow$ eigene \texttt{\_HTMLNode}-Klasse
+    \item \texttt{smtplib} für SMTP\_SSL-Verbindungen
+\end{itemize}
+
+Für den E-Mail-Versand wird \texttt{email.mime} zur MIME-Nachrichtenerstellung
+und \texttt{smtplib.SMTP\_SSL} für die verschlüsselte Verbindung genutzt.
+
+
+% =====================================================================
+\section{Datenpersistenz}
+
+\subsection{CSV-Format}
+
+Die Anwendung speichert Daten als CSV-Dateien (Comma-Separated Values).
+Beim Laden wird \texttt{csv.Sniffer} zur automatischen Erkennung des
+Trennzeichens verwendet -- so werden sowohl Komma- als auch
+Semikolon-getrennte Dateien korrekt gelesen.
+
+\textbf{StandardCakeData.csv} (leere Vorlage):
+\begin{lstlisting}[language={}, caption={CSV-Header}]
+Name,CakeCount,Hanuta,Waffel,Date
+\end{lstlisting}
+
+\textbf{Dynamische Header:} Die Header werden nicht hartcodiert, sondern
+aus der ersten Zeile der CSV-Datei gelesen. Die GUI-Radio-Buttons für
+die Sortierung werden dynamisch aus diesen Headern generiert.
+
+\subsection{Settings (INI)}
+
+Einstellungen werden über Pythons \texttt{configparser}-Modul in einer
+INI-Datei verwaltet. Die Datei wird mit Defaults initialisiert und bei
+Änderungen (z.\,B. Import einer neuen CSV) automatisch aktualisiert.
+
+
+% =====================================================================
+\section{Build-System}
+
+\subsection{build\_release.py}
+
+Das zentrale Build-Skript automatisiert die Release-Erstellung:
+
+\begin{lstlisting}[language=bash, caption={Verwendung}]
+python build_release.py             # Alle 3 Versionen
+python build_release.py --source    # Nur Source-Bundle
+python build_release.py --linux     # Nur Linux Standalone
+python build_release.py --windows   # Nur Windows Standalone
+\end{lstlisting}
+
+\textbf{Build-Schritte:}
+\begin{enumerate}
+    \item \textbf{Clean:} Alter \texttt{release/}-Ordner wird gelöscht
+    \item \textbf{UI-Kompilierung:} \texttt{.ui} $\rightarrow$ \texttt{\_ui.py}
+        via \texttt{pyside6-uic}
+    \item \textbf{Kopieren:} Quelldateien werden in die Release-Struktur kopiert
+    \item \textbf{README:} Automatische README.txt-Generierung
+    \item \textbf{ZIP:} Source-Bundle als ZIP verpackt
+    \item \textbf{PyInstaller:} Standalone-Binary für das aktuelle OS
+    \item \textbf{Remote-Build:} Für das andere OS via GitHub Actions
+        (mit \texttt{gh} CLI)
+\end{enumerate}
+
+\subsection{PyInstaller -- Standalone-Builds}
+
+PyInstaller verpackt Python-Interpreter, PySide6 und alle Quelldateien in
+eine einzelne ausführbare Datei (\texttt{--onefile}).
+
+\textbf{Wichtige Optionen:}
+\begin{itemize}
+    \item \texttt{--onefile} -- Einzelne Datei statt Ordner
+    \item \texttt{--windowed} -- Kein Konsolenfenster (GUI-App)
+    \item \texttt{--add-data} -- Icon und Data-Verzeichnis einbetten
+\end{itemize}
+
+\textbf{Laufzeit-Pfadauflösung:} Da PyInstaller Dateien in ein temporäres
+Verzeichnis (\texttt{sys.\_MEIPASS}) entpackt, aber \texttt{Data/}
+beschreibbar sein muss, wird \texttt{Data/} neben die Executable kopiert.
+Die Funktion \texttt{\_get\_base\_dir()} in \texttt{DataManager} und
+\texttt{SettingsManager} unterscheidet automatisch:
+
+\begin{lstlisting}[language=Python, caption={Pfadauflösung}]
+def _get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))
+\end{lstlisting}
+
+
+\subsection{GitHub Actions -- CI/CD}
+
+Der Workflow \texttt{.github/workflows/build\_release.yml} baut automatisch
+für beide Betriebssysteme:
+
+\begin{itemize}
+    \item \textbf{Trigger:} Version-Tag (\texttt{v*}) oder manueller Dispatch
+    \item \textbf{Matrix-Build:} Ubuntu + Windows parallel
+    \item \textbf{Release-Job:} Erstellt ein GitHub Release mit allen 3 ZIPs
+        als Download-Anhänge
+\end{itemize}
+
+\begin{lstlisting}[language={}, caption={Release auslösen}]
+git tag v1.0
+git push --tags
+\end{lstlisting}
+
+
+% =====================================================================
+\section{Sicherheitsaspekte}
+
+\begin{itemize}
+    \item \textbf{HTML-Escaping:} Alle Tabelleninhalte werden mit
+        \texttt{html.escape()} in der Mail-HTML-Generierung escaped,
+        um Cross-Site-Scripting (XSS) zu verhindern.
+    \item \textbf{Passwort-Löschung:} Das SMTP-Passwort wird im
+        \texttt{finally}-Block von \texttt{IservMailManager.sendMail()}
+        auf \texttt{None} gesetzt.
+    \item \textbf{Spezifische Exceptions:} Statt generischem
+        \texttt{except Exception} werden nur erwartete Exception-Typen
+        gefangen (\texttt{OSError}, \texttt{csv.Error},
+        \texttt{smtplib.SMTPException}, etc.).
+    \item \textbf{SMTP\_SSL:} Die Verbindung zu IServ erfolgt über
+        SSL-verschlüsseltes SMTP (Port 465).
+\end{itemize}
+
+
+% =====================================================================
+\section{Benutzerhandbuch}
+
+\subsection{Installation (Source-Version)}
+
+\begin{lstlisting}[language=bash]
+pip install PySide6
+cd KuchenApp
+python KuchenMain.py
+\end{lstlisting}
+
+\subsection{Installation (Standalone)}
+
+Die Standalone-Version benötigt keine Installation:
+\begin{itemize}
+    \item \textbf{Linux:} \texttt{./KuchenApp}
+    \item \textbf{Windows:} Doppelklick auf \texttt{KuchenApp.exe}
+\end{itemize}
+
+\subsection{Bedienung}
+
+\begin{enumerate}
+    \item \textbf{Daten laden:} Beim Start wird die zuletzt verwendete CSV
+        automatisch geladen.
+    \item \textbf{Import:} Über den \emph{Import}-Button kann eine andere
+        CSV-Datei geladen werden. Die Spalten und Sortier-Buttons passen
+        sich automatisch an.
+    \item \textbf{Bearbeiten:} Zellen können direkt in der Tabelle
+        bearbeitet werden (Doppelklick).
+    \item \textbf{Zeilen hinzufügen/löschen:} Über die Buttons
+        \emph{Add New} und \emph{Delete}.
+    \item \textbf{Sortierung:} Radio-Buttons rechts neben der Tabelle.
+        Ascending/Descending wählt die Richtung.
+    \item \textbf{Suche:} Das Suchfeld filtert live. Bei aktivem
+        Sortier-Button wird nur in der entsprechenden Spalte gesucht.
+    \item \textbf{Speichern:} Über den \emph{Save}-Button. Bei importierten
+        Dateien wird der neue Dateiname in den Settings gespeichert.
+    \item \textbf{Mail-Liste:} Über \emph{View/Edit Mail List} öffnet sich
+        ein separater Dialog zur Verwaltung der Empfänger.
+    \item \textbf{Mails senden:} Über \emph{SendMails}. Es erscheint eine
+        Bestätigung mit der Empfängeranzahl, dann der Login-Dialog.
+\end{enumerate}
+
+
+% =====================================================================
+\section{Glossar}
+
+\begin{description}
+    \item[CSV] Comma-Separated Values -- Tabellenformat mit Trennzeichen
+    \item[INI] Initialisierungsdatei -- Einfaches Konfigurationsformat
+    \item[PySide6] Offizielle Python-Bindings für das Qt 6 Framework
+    \item[Qt Designer] Visueller Editor für Qt-Oberfl\"achen (.ui-Dateien)
+    \item[PyInstaller] Tool zum Verpacken von Python-Programmen als Standalone
+    \item[SMTP\_SSL] Simple Mail Transfer Protocol über SSL-Verschlüsselung
+    \item[Singleton] Entwurfsmuster: Garantiert genau eine Instanz einer Klasse
+    \item[Observer] Entwurfsmuster: Objekte werden über Zustandsänderungen
+        benachrichtigt (in Qt: Signal/Slot)
+    \item[MVC] Model-View-Controller -- Architekturmuster zur Trennung von
+        Daten, Darstellung und Steuerung
+    \item[CI/CD] Continuous Integration / Continuous Deployment -- Automatisierte
+        Build- und Release-Pipelines
+    \item[XSS] Cross-Site Scripting -- Sicherheitslücke durch unescapten
+        HTML-Input
+    \item[IServ] Schulplattform mit E-Mail, Kalender und Dateiverwaltung
+\end{description}
+
+\end{document}

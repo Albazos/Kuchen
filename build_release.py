@@ -2,25 +2,45 @@
 """
 Build-Skript fuer KuchenApp Release.
 
-Erstellt aus den Quelldateien eine strukturierte Release-Version
-mit src/, ui/, assets/ Ordnern und passt die Imports automatisch an.
-Erzeugt am Ende eine KuchenApp.zip.
+Erstellt aus den Quelldateien:
+  1) Eine strukturierte Source-Release-Version (KuchenApp.zip)
+  2) Eine standalone Anwendung fuer Linux
+  3) Eine standalone Anwendung fuer Windows
 
-Ausfuehren:  python3 build_release.py
+Ausfuehren:
+  python3 build_release.py            # Alle 3 Versionen
+  python3 build_release.py --source   # Nur Source-Bundle
+  python3 build_release.py --linux    # Nur Linux Standalone
+  python3 build_release.py --windows  # Nur Windows Standalone
+
+Die Version fuer das aktuelle OS wird lokal gebaut (PyInstaller).
+Die Version fuer das andere OS wird via GitHub Actions gebaut.
+
+Voraussetzungen fuer Remote-Build:
+  - gh CLI installiert und authentifiziert (gh auth login)
+  - GitHub Repository konfiguriert
 """
 
+import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 
 # --- Konfiguration ---
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEV_DIR = os.path.join(SCRIPT_DIR, "develop")
-BUILD_DIR = os.path.join(SCRIPT_DIR, "release", "KuchenApp")
-ZIP_PATH = os.path.join(SCRIPT_DIR, "release", "KuchenApp.zip")
+RELEASE_DIR = os.path.join(SCRIPT_DIR, "release")
+BUILD_DIR = os.path.join(RELEASE_DIR, "KuchenApp")
+ZIP_PATH = os.path.join(RELEASE_DIR, "KuchenApp.zip")
+
+OS_TAG = platform.system().lower()  # "linux" oder "windows"
+STANDALONE_DIR = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}")
+STANDALONE_ZIP_PATH = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
 
 # Dateien die nach src/ kopiert werden
 SRC_FILES = [
@@ -137,8 +157,8 @@ def compile_ui():
 
 def clean_build():
     """Loescht den alten Build-Ordner und ZIP."""
-    if os.path.exists(os.path.join(SCRIPT_DIR, "release")):
-        shutil.rmtree(os.path.join(SCRIPT_DIR, "release"))
+    if os.path.exists(RELEASE_DIR):
+        shutil.rmtree(RELEASE_DIR)
         print("[clean] Alter release/ Ordner geloescht")
 
 
@@ -208,6 +228,183 @@ def create_zip():
     print(f"        Groesse: {size_kb:.0f} KB")
 
 
+def build_standalone():
+    """Erstellt eine standalone Anwendung mit PyInstaller."""
+    pyinstaller = shutil.which("pyinstaller")
+    if pyinstaller is None:
+        prefix = os.path.dirname(sys.executable)
+        candidate = os.path.join(prefix, "pyinstaller")
+        if os.path.isfile(candidate):
+            pyinstaller = candidate
+    if pyinstaller is None:
+        print("[exe]   FEHLER: pyinstaller nicht gefunden!")
+        print("        Installiere PyInstaller: pip install pyinstaller")
+        return False
+
+    main_script = os.path.join(BUILD_DIR, MAIN_FILE)
+    icon_path = os.path.join(BUILD_DIR, "assets", "kuchen_icon.svg")
+    data_dir = os.path.join(BUILD_DIR, "Data")
+
+    cmd = [
+        pyinstaller,
+        "--onefile",
+        "--windowed",
+        "--name", "KuchenApp",
+        "--distpath", STANDALONE_DIR,
+        "--workpath", os.path.join(RELEASE_DIR, "_pybuild"),
+        "--specpath", os.path.join(RELEASE_DIR, "_pybuild"),
+        "--add-data", f"{data_dir}{os.pathsep}Data",
+        "--add-data", f"{icon_path}{os.pathsep}assets",
+        main_script,
+    ]
+
+    print(f"[exe]   PyInstaller wird ausgefuehrt ...")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[exe]   FEHLER: {result.stderr.strip()}")
+        return False
+
+    # Aufraumen: _pybuild Ordner entfernen
+    pybuild = os.path.join(RELEASE_DIR, "_pybuild")
+    if os.path.exists(pybuild):
+        shutil.rmtree(pybuild)
+
+    # Data/ neben die exe kopieren (wird zur Laufzeit beschrieben)
+    standalone_data = os.path.join(STANDALONE_DIR, "Data")
+    shutil.copytree(data_dir, standalone_data)
+
+    print(f"[exe]   Standalone erstellt: {STANDALONE_DIR}")
+
+    # ZIP fuer Standalone erstellen
+    with zipfile.ZipFile(STANDALONE_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(STANDALONE_DIR):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arcname = os.path.join(f"KuchenApp_standalone_{OS_TAG}", os.path.relpath(full_path, STANDALONE_DIR))
+                zf.write(full_path, arcname)
+    size_mb = os.path.getsize(STANDALONE_ZIP_PATH) / (1024 * 1024)
+    print(f"[zip]   {STANDALONE_ZIP_PATH}")
+    print(f"        Groesse: {size_mb:.1f} MB")
+    return True
+
+
+def _run_gh(args):
+    """Fuehrt einen gh CLI Befehl aus und gibt stdout zurueck."""
+    result = subprocess.run(
+        ["gh"] + args, capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip())
+    return result.stdout.strip()
+
+
+def build_remote_standalone():
+    """Baut die Standalone-Version fuer das andere OS via GitHub Actions."""
+    if shutil.which("gh") is None:
+        print("[remote] FEHLER: gh CLI nicht gefunden!")
+        print("         Installiere: https://cli.github.com/")
+        return False
+
+    remote_os = "windows" if OS_TAG == "linux" else "linux"
+    print(f"[remote] Starte GitHub Actions Build fuer {remote_os} ...")
+
+    # Workflow triggern
+    try:
+        _run_gh(["workflow", "run", "build_release.yml"])
+    except RuntimeError as e:
+        print(f"[remote] FEHLER beim Triggern: {e}")
+        return False
+
+    # Warten bis der Run gestartet ist
+    print("[remote] Warte auf Workflow-Start ...")
+    time.sleep(5)
+
+    # Neuesten Run finden
+    try:
+        runs_json = _run_gh([
+            "run", "list",
+            "--workflow", "build_release.yml",
+            "--limit", "1",
+            "--json", "databaseId,status"
+        ])
+        runs = json.loads(runs_json)
+        if not runs:
+            print("[remote] FEHLER: Kein Workflow-Run gefunden")
+            return False
+        run_id = str(runs[0]["databaseId"])
+    except (RuntimeError, json.JSONDecodeError, KeyError) as e:
+        print(f"[remote] FEHLER: {e}")
+        return False
+
+    # Auf Abschluss warten
+    print(f"[remote] Warte auf Run {run_id} ...")
+    try:
+        _run_gh(["run", "watch", run_id, "--exit-status"])
+    except RuntimeError as e:
+        print(f"[remote] FEHLER: Workflow fehlgeschlagen: {e}")
+        return False
+
+    # Artifact herunterladen
+    artifact_name = f"KuchenApp-standalone-{remote_os}"
+    remote_zip_name = f"KuchenApp_standalone_{remote_os}.zip"
+    download_dir = os.path.join(RELEASE_DIR, "_remote_download")
+    os.makedirs(download_dir, exist_ok=True)
+
+    print(f"[remote] Lade Artifact '{artifact_name}' herunter ...")
+    try:
+        _run_gh([
+            "run", "download", run_id,
+            "--name", artifact_name,
+            "--dir", download_dir
+        ])
+    except RuntimeError as e:
+        print(f"[remote] FEHLER beim Download: {e}")
+        return False
+
+    # ZIP in release/ verschieben
+    downloaded_zip = os.path.join(download_dir, remote_zip_name)
+    target_zip = os.path.join(RELEASE_DIR, remote_zip_name)
+    if os.path.isfile(downloaded_zip):
+        shutil.move(downloaded_zip, target_zip)
+    else:
+        # gh download entpackt manchmal in einen Unterordner
+        for root, dirs, files in os.walk(download_dir):
+            for f in files:
+                if f == remote_zip_name:
+                    shutil.move(os.path.join(root, f), target_zip)
+                    break
+
+    # Aufraemen
+    if os.path.exists(download_dir):
+        shutil.rmtree(download_dir)
+
+    if os.path.isfile(target_zip):
+        # ZIP auch in Ordner entpacken
+        remote_dir = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{remote_os}")
+        os.makedirs(remote_dir, exist_ok=True)
+        with zipfile.ZipFile(target_zip, "r") as zf:
+            for member in zf.namelist():
+                # Ersten Pfadteil (Archiv-Ordnername) entfernen
+                parts = member.split("/", 1)
+                if len(parts) > 1 and parts[1]:
+                    target_path = os.path.join(remote_dir, parts[1])
+                    if member.endswith("/"):
+                        os.makedirs(target_path, exist_ok=True)
+                    else:
+                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                        with zf.open(member) as src, open(target_path, "wb") as dst:
+                            shutil.copyfileobj(src, dst)
+
+        size_mb = os.path.getsize(target_zip) / (1024 * 1024)
+        print(f"[remote] {target_zip}")
+        print(f"[remote] {remote_dir}")
+        print(f"         Groesse: {size_mb:.1f} MB")
+        return True
+    else:
+        print(f"[remote] FEHLER: {remote_zip_name} nicht gefunden")
+        return False
+
+
 def main():
     print("=" * 40)
     print("  KuchenApp Release Build")
@@ -216,15 +413,40 @@ def main():
 
     clean_build()
     compile_ui()
+
+    # Source-Bundle
     create_dirs()
     copy_files()
     write_readme()
     create_zip()
+    print()
+    print("--- Source-Release ---")
+    print(f"  ZIP:  {ZIP_PATH}")
+
+    local_os = OS_TAG  # "linux" oder "windows"
+    remote_os = "windows" if local_os == "linux" else "linux"
+
+    # Lokales OS bauen (Linux oder Windows)
+    print()
+    if build_standalone():
+        print()
+        print(f"--- Standalone {local_os.capitalize()} ---")
+        print(f"  ZIP:  {STANDALONE_ZIP_PATH}")
+    else:
+        print("[exe]   Lokaler Standalone-Build fehlgeschlagen.")
+
+    # Remote OS bauen (das jeweils andere)
+    print()
+    if build_remote_standalone():
+        remote_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{remote_os}.zip")
+        print()
+        print(f"--- Standalone {remote_os.capitalize()} (remote) ---")
+        print(f"  ZIP:  {remote_zip}")
+    else:
+        print(f"[remote] {remote_os.capitalize()}-Build fehlgeschlagen.")
 
     print()
-    print("Fertig! Release liegt in:")
-    print(f"  Ordner: {BUILD_DIR}")
-    print(f"  ZIP:    {ZIP_PATH}")
+    print("Fertig!")
 
 
 if __name__ == "__main__":

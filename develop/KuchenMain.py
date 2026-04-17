@@ -275,7 +275,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "kuchen_icon.svg")
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS  # type: ignore
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    icon_path = os.path.join(base_path, "assets", "kuchen_icon.svg")
     app.setWindowIcon(QIcon(icon_path))
     lCMainWindow = CMainWindow()
     lCMainWindow.setWindowIcon(QIcon(icon_path))

@@ -34,7 +34,7 @@ Projektstruktur:
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
   +-- Data/
-      |-- CakeData.csv         <- Kuchendaten (leer, nur Header)
+      |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
       |-- Settings/
       |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/

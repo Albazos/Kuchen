@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QLabel
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
@@ -20,6 +20,8 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mDM = DM.DataManager()
         self.mKMM = None
         self.mRadioButtons = []
+        self.mRbnAscending = None
+        self.mRbnDescending = None
         
         self.mLogger = AL.AppLogger()
         self.mLogger.errorOccurred.connect(self._showError)
@@ -96,11 +98,13 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             lSelectedFile = lFileDialog.selectedFiles()
             if lSelectedFile:
                 lFilePath = lSelectedFile[0]
-                self.mDM.ImportFile(lFilePath)
-                self.mHeaders = self.mDM.mMainHeaders[:]
-                self._createRadioButtons()
-                self.FillTable()
-                self.labInfo.setText("File imported successfully")
+                if self.mDM.ImportFile(lFilePath):
+                    self.mHeaders = self.mDM.mMainHeaders[:]
+                    self._createRadioButtons()
+                    self.FillTable()
+                    self.labInfo.setText("File imported successfully")
+                else:
+                    self.labInfo.setText("Import failed")
         else:
             self.labInfo.setText("No file selected")
 
@@ -168,6 +172,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         # Cancel: do nothing
 
     
+    def _isDescending(self):
+        return self.mRbnDescending is not None and self.mRbnDescending.isChecked()
+
     def SortColumn(self):
         lSortColumn = None
         for lRbn in self.mRadioButtons:
@@ -177,7 +184,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
         if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn))
-            self.mDM.sortData(self.mDM.getSortedColumnIndex())
+            self.mDM.sortData(self.mDM.getSortedColumnIndex(), aReverse=self._isDescending())
             lSearchText = self.leSearch.text()
             if lSearchText.strip():
                 self.Search(lSearchText)
@@ -207,6 +214,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                 self.mDM.setSortedData(lFiltered)
             else:
                 self.mDM.setSortedData([row[:] for row in self.mDM.getData()])
+            self.mDM.sortData(self.mDM.getSortedColumnIndex(), aReverse=self._isDescending())
         else:
             if aText.strip():  
                self.mDM.setSortedData([lRow for lRow in self.mDM.getData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
@@ -224,6 +232,14 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             self.verticalLayout.removeWidget(lRbn)
             lRbn.deleteLater()
         self.mRadioButtons.clear()
+
+        if self.mRbnAscending is not None:
+            self.mRbnAscending.deleteLater()
+            self.mRbnAscending = None
+        if self.mRbnDescending is not None:
+            self.mRbnDescending.deleteLater()
+            self.mRbnDescending = None
+
         for i, lHeader in enumerate(self.mHeaders):
             lRbn = QRadioButton(lHeader)
             lRbn.setProperty("headerKey", lHeader)
@@ -231,8 +247,22 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                 lRbn.setChecked(True)
             self.verticalLayout.addWidget(lRbn)
             self.mRadioButtons.append(lRbn)
+
+        lOrderLayout = QHBoxLayout()
+        self.mRbnAscending = QRadioButton("Ascending")
+        self.mRbnDescending = QRadioButton("Descending")
+        self.mRbnAscending.setChecked(True)
+        lOrderGroup = QButtonGroup(self)
+        lOrderGroup.addButton(self.mRbnAscending)
+        lOrderGroup.addButton(self.mRbnDescending)
+        lOrderLayout.addWidget(self.mRbnAscending)
+        lOrderLayout.addWidget(self.mRbnDescending)
+        self.verticalLayout.addLayout(lOrderLayout)
+
         for lRbn in self.mRadioButtons:
             lRbn.toggled.connect(self.SortColumn)
+        self.mRbnAscending.toggled.connect(self.SortColumn)
+        self.mRbnDescending.toggled.connect(self.SortColumn)
 
     def _showError(self, aTitle, aMessage):
         QMessageBox.critical(self, aTitle, aMessage)
@@ -245,7 +275,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "kuchen_icon.svg")
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS  # type: ignore
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    icon_path = os.path.join(base_path, "assets", "kuchen_icon.svg")
     app.setWindowIcon(QIcon(icon_path))
     lCMainWindow = CMainWindow()
     lCMainWindow.setWindowIcon(QIcon(icon_path))

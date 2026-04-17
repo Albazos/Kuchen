@@ -1,0 +1,73 @@
+name: Build KuchenApp Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  standalone:
+    name: Standalone (${{ matrix.os_name }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            os_name: linux
+          - runner: windows-latest
+            os_name: windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install PySide6 pyinstaller
+
+      - name: Build release
+        run: |
+          cd Kuchen
+          python build_release.py
+
+      - name: Upload Standalone ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: KuchenApp-standalone-${{ matrix.os_name }}
+          path: Kuchen/release/KuchenApp_standalone_${{ matrix.os_name }}.zip
+
+      - name: Upload Source Bundle
+        if: matrix.os_name == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KuchenApp-source
+          path: Kuchen/release/KuchenApp.zip
+
+  release:
+    name: Create GitHub Release
+    needs: [standalone]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Collect ZIPs
+        run: |
+          mkdir release-files
+          cp artifacts/KuchenApp-source/KuchenApp.zip release-files/KuchenApp_source.zip
+          cp artifacts/KuchenApp-standalone-linux/KuchenApp_standalone_linux.zip release-files/
+          cp artifacts/KuchenApp-standalone-windows/KuchenApp_standalone_windows.zip release-files/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: KuchenApp ${{ github.ref_name }}
+          generate_release_notes: true
+          files: release-files/*
