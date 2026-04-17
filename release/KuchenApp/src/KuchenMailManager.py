@@ -3,7 +3,7 @@ from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
 from ui.UIMailsDialog_ui import Ui_Dialog
-from src import AppLogger as AL
+from . import AppLogger as AL
 
 class CKuchenDialog(QDialog, Ui_Dialog):
     
@@ -31,12 +31,11 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         if self.mDM.LoadStandardFile(aForMainTable=False):
             self.mHeaders = self.mDM.mMailHeaders[:]
             self._createRadioButtons()
-            self.FillTable()
+            self.SortColumn()
             self.labInfo.setText("File imported successfully")
         else:
             self.mHeaders = []
             self.labInfo.setText("No file selected")
-        self.SortColumn()
     
     def SaveFile(self):
         if self.mDM.SaveFile(aForMainTable=False):
@@ -126,7 +125,11 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn), aForMain=False)
             self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aForMain=False)
-            self.FillTable(True)
+            lSearchText = self.leSearch.text()
+            if lSearchText.strip():
+                self.Search(lSearchText)
+            else:
+                self.FillTable(True)
 
     def CellEdited(self, aItem):
         lRow = aItem.row()
@@ -173,6 +176,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
             lRbn.setProperty("headerKey", lHeader)
             if i == 0:
                 lRbn.setChecked(True)
-            lRbn.toggled.connect(self.SortColumn)
             self.verticalLayout.addWidget(lRbn)
             self.mRadioButtons.append(lRbn)
+        for lRbn in self.mRadioButtons:
+            lRbn.toggled.connect(self.SortColumn)

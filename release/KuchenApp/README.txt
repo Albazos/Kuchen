@@ -38,7 +38,7 @@ Projektstruktur:
       |-- Settings/
       |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
       +-- Klassen/
-          +-- StandartKlasse.csv  <- Klassenliste (leer, nur Header)
+          +-- StandardKlasse.csv  <- Klassenliste (leer, nur Header)
 
 
 Starten:

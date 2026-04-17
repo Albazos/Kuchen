@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QFileDialog, QDialog, QRadioButton
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtCore import Qt
 
-from UIMailsDialog_ui import Ui_Dialog
-import AppLogger as AL
+from ui.UIMailsDialog_ui import Ui_Dialog
+from . import AppLogger as AL
 
 class CKuchenDialog(QDialog, Ui_Dialog):
     

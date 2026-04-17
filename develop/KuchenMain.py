@@ -4,11 +4,11 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBo
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
-import DataManager as DM
-import KuchenMailManager as KMM
-import LoginDialog as LD
-import AppLogger as AL
-from UIMainWindow_ui import Ui_MainWindow  
+from src import DataManager as DM
+from src import KuchenMailManager as KMM
+from src import LoginDialog as LD
+from src import AppLogger as AL
+from ui.UIMainWindow_ui import Ui_MainWindow  
 
 
 class CMainWindow(QMainWindow, Ui_MainWindow):
@@ -245,7 +245,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kuchen_icon.svg")
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "kuchen_icon.svg")
     app.setWindowIcon(QIcon(icon_path))
     lCMainWindow = CMainWindow()
     lCMainWindow.setWindowIcon(QIcon(icon_path))

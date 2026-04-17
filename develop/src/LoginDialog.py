@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QDialog
 
-import IservMailManager as ISM
-import SettingsManager as SM
-from UILoginDialog_ui import Ui_Dialog
+from . import IservMailManager as ISM
+from . import SettingsManager as SM
+from ui.UILoginDialog_ui import Ui_Dialog
 
 class CLoginDialog(QDialog, Ui_Dialog):
     

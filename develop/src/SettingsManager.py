@@ -18,7 +18,7 @@ class SettingsManager:
     }
 
     def __init__(self):
-        self._base_dir = os.path.dirname(os.path.abspath(__file__))
+        self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self._settings_dir = os.path.join(self._base_dir, "Data", "Settings")
         self._settings_path = os.path.join(self._settings_dir, "settings.ini")
         self._config = configparser.ConfigParser()

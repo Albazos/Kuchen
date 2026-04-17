@@ -1,6 +1,6 @@
-from IServAPIEdited_standalone import IServAPI
+from .IServAPIEdited_standalone import IServAPI
 import smtplib
-import AppLogger as AL
+from . import AppLogger as AL
 
 class IservMailManager:
     

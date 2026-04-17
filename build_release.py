@@ -18,6 +18,7 @@ import zipfile
 # --- Konfiguration ---
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEV_DIR = os.path.join(SCRIPT_DIR, "develop")
 BUILD_DIR = os.path.join(SCRIPT_DIR, "release", "KuchenApp")
 ZIP_PATH = os.path.join(SCRIPT_DIR, "release", "KuchenApp.zip")
 
@@ -53,36 +54,6 @@ ASSET_FILES = [
 
 # Hauptdatei (bleibt im Root)
 MAIN_FILE = "KuchenMain.py"
-
-# Import-Ersetzungen pro Datei (wird auf die KOPIEN im Build-Ordner angewandt)
-IMPORT_REPLACEMENTS = {
-    "KuchenMain.py": [
-        ("import DataManager as DM", "from src import DataManager as DM"),
-        ("import KuchenMailManager as KMM", "from src import KuchenMailManager as KMM"),
-        ("import LoginDialog as LD", "from src import LoginDialog as LD"),
-        ("import AppLogger as AL", "from src import AppLogger as AL"),
-        ("from UIMainWindow_ui import Ui_MainWindow", "from ui.UIMainWindow_ui import Ui_MainWindow"),
-        # Icon-Pfad anpassen
-        ('"kuchen_icon.svg"', '"assets", "kuchen_icon.svg"'),
-    ],
-    "KuchenMailManager.py": [
-        ("from UIMailsDialog_ui import Ui_Dialog", "from ui.UIMailsDialog_ui import Ui_Dialog"),
-        ("import AppLogger as AL", "from src import AppLogger as AL"),
-    ],
-    "LoginDialog.py": [
-        ("import IservMailManager as ISM", "from src import IservMailManager as ISM"),
-        ("import SettingsManager as SM", "from src import SettingsManager as SM"),
-        ("from UILoginDialog_ui import Ui_Dialog", "from ui.UILoginDialog_ui import Ui_Dialog"),
-    ],
-    "IservMailManager.py": [
-        ("from IServAPIEdited_standalone import IServAPI", "from src.IServAPIEdited_standalone import IServAPI"),
-        ("import AppLogger as AL", "from src import AppLogger as AL"),
-    ],
-    "DataManager.py": [
-        ("import SettingsManager as SM", "from src import SettingsManager as SM"),
-        ("import AppLogger as AL", "from src import AppLogger as AL"),
-    ],
-}
 
 README_CONTENT = """\
 ========================================
@@ -150,8 +121,8 @@ def compile_ui():
 
     count = 0
     for ui_file, py_file in UI_SOURCE_FILES.items():
-        ui_path = os.path.join(SCRIPT_DIR, ui_file)
-        py_path = os.path.join(SCRIPT_DIR, py_file)
+        ui_path = os.path.join(DEV_DIR, "ui", ui_file)
+        py_path = os.path.join(DEV_DIR, "ui", py_file)
         if not os.path.isfile(ui_path):
             print(f"[ui]    WARNUNG: {ui_file} nicht gefunden, uebersprungen")
             continue
@@ -181,19 +152,19 @@ def create_dirs():
 def copy_files():
     """Kopiert alle Dateien in die Release-Struktur."""
     # Hauptdatei
-    shutil.copy2(os.path.join(SCRIPT_DIR, MAIN_FILE), BUILD_DIR)
+    shutil.copy2(os.path.join(DEV_DIR, MAIN_FILE), BUILD_DIR)
 
     # src/
     for f in SRC_FILES:
-        shutil.copy2(os.path.join(SCRIPT_DIR, f), os.path.join(BUILD_DIR, "src"))
+        shutil.copy2(os.path.join(DEV_DIR, "src", f), os.path.join(BUILD_DIR, "src"))
 
     # ui/
     for f in UI_FILES:
-        shutil.copy2(os.path.join(SCRIPT_DIR, f), os.path.join(BUILD_DIR, "ui"))
+        shutil.copy2(os.path.join(DEV_DIR, "ui", f), os.path.join(BUILD_DIR, "ui"))
 
     # assets/
     for f in ASSET_FILES:
-        shutil.copy2(os.path.join(SCRIPT_DIR, f), os.path.join(BUILD_DIR, "assets"))
+        shutil.copy2(os.path.join(DEV_DIR, "assets", f), os.path.join(BUILD_DIR, "assets"))
 
     # Data/ - leere CSVs mit nur Header-Zeile erstellen
     with open(os.path.join(BUILD_DIR, "Data", "CakeData.csv"), "w", newline="") as f:
@@ -212,30 +183,6 @@ def copy_files():
             pass
 
     print("[copy]  Dateien kopiert")
-
-
-def patch_imports():
-    """Passt die Imports in den kopierten Dateien an die Release-Struktur an."""
-    count = 0
-    for filename, replacements in IMPORT_REPLACEMENTS.items():
-        # Bestimme den Pfad der kopierten Datei
-        if filename == MAIN_FILE:
-            filepath = os.path.join(BUILD_DIR, filename)
-        else:
-            filepath = os.path.join(BUILD_DIR, "src", filename)
-
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        for old, new in replacements:
-            if old in content:
-                content = content.replace(old, new)
-                count += 1
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
-
-    print(f"[patch] {count} Import(s) angepasst")
 
 
 def write_readme():
@@ -271,7 +218,6 @@ def main():
     compile_ui()
     create_dirs()
     copy_files()
-    patch_imports()
     write_readme()
     create_zip()
 

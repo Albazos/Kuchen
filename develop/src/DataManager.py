@@ -2,8 +2,8 @@
 import csv
 import os
 import html
-import SettingsManager as SM
-import AppLogger as AL
+from . import SettingsManager as SM
+from . import AppLogger as AL
 
 class DataManager():
     
@@ -17,7 +17,7 @@ class DataManager():
         self.mSortedColumnIndex = None
         self.mMainHeaders = []
         self.mMailHeaders = []
-        self._base_dir = os.path.dirname(os.path.abspath(__file__))
+        self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.mSettings = SM.SettingsManager()
         self.mLogger = AL.AppLogger()
     
