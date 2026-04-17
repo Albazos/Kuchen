@@ -28,22 +28,20 @@ jobs:
         run: pip install PySide6 pyinstaller
 
       - name: Build release
-        run: |
-          cd Kuchen
-          python build_release.py
+        run: python build_release.py
 
       - name: Upload Standalone ZIP
         uses: actions/upload-artifact@v4
         with:
           name: KuchenApp-standalone-${{ matrix.os_name }}
-          path: Kuchen/release/KuchenApp_standalone_${{ matrix.os_name }}.zip
+          path: release/KuchenApp_standalone_${{ matrix.os_name }}.zip
 
       - name: Upload Source Bundle
         if: matrix.os_name == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: KuchenApp-source
-          path: Kuchen/release/KuchenApp.zip
+          path: release/KuchenApp.zip
 
   release:
     name: Create GitHub Release
