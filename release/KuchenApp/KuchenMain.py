@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QLabel
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QVBoxLayout, QLabel, QGroupBox, QSizePolicy, QHeaderView
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
@@ -22,6 +22,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mRadioButtons = []
         self.mRbnAscending = None
         self.mRbnDescending = None
+        self.mSortGroupBox = None
         
         self.mLogger = AL.AppLogger()
         self.mLogger.errorOccurred.connect(self._showError)
@@ -29,7 +30,26 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.mLogger.infoOccurred.connect(self._showInfo)
         
         self.clearLabels()
-        
+
+        # Wrap search in a group box
+        lSearchGroup = QGroupBox("Search")
+        lSearchLayout = QVBoxLayout()
+        lSearchLayout.addWidget(self.leSearch)
+        lSearchGroup.setLayout(lSearchLayout)
+        self.verticalLayout_2.removeWidget(self.labSearch)
+        self.labSearch.deleteLater()
+        self.verticalLayout_2.removeWidget(self.leSearch)
+        self.verticalLayout_2.insertWidget(0, lSearchGroup)
+
+        # Remove the old sort label (will be replaced by group box title)
+        self.verticalLayout.removeWidget(self.labSort)
+        self.labSort.deleteLater()
+
+        # Give the table more horizontal space
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(1, 0)
+        self.tableView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
         self.pbnImport.clicked.connect(self.ImportFile)
         self.pbnSave.clicked.connect(self.SaveFile)
         self.pbnQuit.clicked.connect(self.QuitButton)
@@ -43,6 +63,8 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
         self.model = QStandardItemModel()
         self.tableView.setModel(self.model)
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         self.model.dataChanged.connect(self.CellEdited)
         if self.mDM.LoadStandardFile():
@@ -229,7 +251,6 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
     def _createRadioButtons(self):
         for lRbn in self.mRadioButtons:
-            self.verticalLayout.removeWidget(lRbn)
             lRbn.deleteLater()
         self.mRadioButtons.clear()
 
@@ -239,16 +260,23 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         if self.mRbnDescending is not None:
             self.mRbnDescending.deleteLater()
             self.mRbnDescending = None
+        if self.mSortGroupBox is not None:
+            self.verticalLayout.removeWidget(self.mSortGroupBox)
+            self.mSortGroupBox.deleteLater()
 
+        self.mSortGroupBox = QGroupBox("Sort")
+        lSortLayout = QHBoxLayout()
+
+        lColumnLayout = QVBoxLayout()
         for i, lHeader in enumerate(self.mHeaders):
             lRbn = QRadioButton(lHeader)
             lRbn.setProperty("headerKey", lHeader)
             if i == 0:
                 lRbn.setChecked(True)
-            self.verticalLayout.addWidget(lRbn)
+            lColumnLayout.addWidget(lRbn)
             self.mRadioButtons.append(lRbn)
 
-        lOrderLayout = QHBoxLayout()
+        lOrderLayout = QVBoxLayout()
         self.mRbnAscending = QRadioButton("Ascending")
         self.mRbnDescending = QRadioButton("Descending")
         self.mRbnAscending.setChecked(True)
@@ -257,7 +285,13 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lOrderGroup.addButton(self.mRbnDescending)
         lOrderLayout.addWidget(self.mRbnAscending)
         lOrderLayout.addWidget(self.mRbnDescending)
-        self.verticalLayout.addLayout(lOrderLayout)
+        lOrderLayout.addStretch()
+
+        lSortLayout.addLayout(lColumnLayout)
+        lSortLayout.addLayout(lOrderLayout)
+        self.mSortGroupBox.setLayout(lSortLayout)
+        self.verticalLayout.addWidget(self.mSortGroupBox)
+        self.verticalLayout.addStretch()
 
         for lRbn in self.mRadioButtons:
             lRbn.toggled.connect(self.SortColumn)
@@ -274,6 +308,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         QMessageBox.information(self, aTitle, aMessage)
         
 if __name__ == "__main__":
+    # Set AppUserModelID so Windows taskbar shows our icon instead of Python's
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("KuchenApp")
+
     app = QApplication(sys.argv)
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS  # type: ignore
