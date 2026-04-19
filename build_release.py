@@ -300,6 +300,12 @@ def build_standalone():
     standalone_data = os.path.join(standalone_dir, "Data")
     shutil.copytree(data_dir, standalone_data)
 
+    # assets/ neben die exe kopieren (Icons etc.)
+    assets_src = os.path.join(BUILD_DIR, "assets")
+    assets_dst = os.path.join(standalone_dir, "assets")
+    if os.path.isdir(assets_src):
+        shutil.copytree(assets_src, assets_dst)
+
     print(f"[exe]   Standalone erstellt: {standalone_dir}")
 
     # ZIP fuer Standalone erstellen
