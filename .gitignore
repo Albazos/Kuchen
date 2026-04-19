@@ -10,9 +10,6 @@ build/
 .venv/
 venv/
 
-# PyInstaller
-release/
-
 # LaTeX build files
 docs/*.aux
 docs/*.log
