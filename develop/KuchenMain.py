@@ -75,6 +75,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.mHeaders = []
             self.labInfo.setText("No file selected")
+        
+        # Mail-Liste beim Start laden
+        self.mDM.LoadStandardFile(aForMainTable=False)
     
     def SaveFile(self):
         if self.mDM.SaveFile():
