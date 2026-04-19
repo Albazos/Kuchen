@@ -69,7 +69,7 @@ def bump_patch():
 # Dateien die nach src/ kopiert werden
 SRC_FILES = [
     "DataManager.py",
-    "IServAPIEdited_standalone.py",
+    "IServAPI.py",
     "IservMailManager.py",
     "KuchenMailManager.py",
     "LoginDialog.py",
@@ -129,7 +129,7 @@ Projektstruktur:
   |   |-- KuchenMailManager.py <- Dialog fuer Mail-Liste
   |   |-- LoginDialog.py       <- Login-Dialog fuer IServ
   |   |-- IservMailManager.py  <- Mail-Versand ueber IServ API
-  |   |-- IServAPIEdited_standalone.py  <- IServ API (nur stdlib, kein pip)
+  |   |-- IServAPI.py          <- IServ API (nur stdlib, kein pip)
   |   +-- SettingsManager.py   <- Einstellungsverwaltung (INI-Datei)
   |-- ui/
   |   |-- UIMainWindow_ui.py

@@ -1,4 +1,4 @@
-from .IServAPIEdited_standalone import IServAPI
+from .IServAPI import IServAPI
 import smtplib
 from . import AppLogger as AL
 
