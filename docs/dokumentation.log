@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  19 APR 2026 12:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2026.1.8)  19 APR 2026 12:45
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -769,10 +769,6 @@ File: lstlang1.sty 2025/11/14 1.11b listings language file
 ) (c:/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
 )
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
 Overfull \hbox (49.17738pt too wide) in paragraph at lines 660--663
 []\T1/lmr/bx/n/12 Laufzeit-Pfadaufloesung: \T1/lmr/m/n/12 Da Py-In-stal-ler Da-tei-en in ein tem-po-rae-res Ver-zeich-nis (\T1/lmtt/m/n/12 sys._MEIPASS\T1/lmr/m/n/12 )
  []

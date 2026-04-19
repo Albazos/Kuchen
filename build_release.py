@@ -3,22 +3,26 @@
 Build-Skript fuer KuchenApp Release.
 
 Ausfuehren:
-  python3 build_release.py                # Source bauen + Standalone-ZIPs
-                                          # vom GitHub Release herunterladen
-  python3 build_release.py --no-download  # Nur Source bauen, kein Download
+  python3 build_release.py          # Vollstaendiges Release:
+                                    # Patch hochzaehlen, Source bauen,
+                                    # Tag+Push, CI abwarten, download
 
-Standalone-Builds (Linux + Windows) werden ueber GitHub Actions erstellt:
-  git tag v1.0.0 && git push --tags
-  -> CI baut Source + Linux Standalone + Windows Standalone
-  -> GitHub Release mit allen 3 ZIPs
+  Major/Minor manuell in version.ini aendern.
+  Patch wird bei jedem Build automatisch hochgezaehlt.
+
+Nur fuer CI (nicht manuell aufrufen):
+  python3 build_release.py --source     # Nur Source bauen
+  python3 build_release.py --standalone  # Standalone fuer aktuelles OS
 """
 
+import configparser
 import json
 import os
 import platform
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 
 # --- Konfiguration ---
@@ -30,6 +34,37 @@ BUILD_DIR = os.path.join(RELEASE_DIR, "KuchenApp")
 ZIP_PATH = os.path.join(RELEASE_DIR, "KuchenApp.zip")
 
 OS_TAG = platform.system().lower()  # "linux" oder "windows"
+
+VERSION_INI = os.path.join(SCRIPT_DIR, "version.ini")
+
+
+def read_version():
+    """Liest die aktuelle Version aus version.ini."""
+    cfg = configparser.ConfigParser()
+    cfg.read(VERSION_INI, encoding="utf-8")
+    major = cfg.getint("Version", "major", fallback=0)
+    minor = cfg.getint("Version", "minor", fallback=0)
+    patch = cfg.getint("Version", "patch", fallback=0)
+    return major, minor, patch
+
+
+def bump_patch():
+    """Erhoeht den Patch-Zaehler und schreibt zurueck. Gibt den Tag-String zurueck."""
+    major, minor, patch = read_version()
+    patch += 1
+
+    cfg = configparser.ConfigParser()
+    cfg["Version"] = {
+        "major": str(major),
+        "minor": str(minor),
+        "patch": str(patch),
+    }
+    with open(VERSION_INI, "w", encoding="utf-8") as f:
+        cfg.write(f)
+
+    tag = f"v{major}.{minor}.{patch}"
+    print(f"[ver]   Version: {tag}")
+    return tag
 
 # Dateien die nach src/ kopiert werden
 SRC_FILES = [
@@ -280,17 +315,83 @@ def build_standalone():
     return True
 
 
-def download_release():
-    """Laedt die Standalone-ZIPs vom neuesten GitHub Release herunter."""
+def _find_gh():
+    """Sucht die gh CLI."""
     gh = shutil.which("gh")
     if gh is None:
-        # Bekannter Installationspfad auf Windows
         candidate = os.path.join("C:\\", "Program Files", "GitHub CLI", "gh.exe")
         if os.path.isfile(candidate):
             gh = candidate
     if gh is None:
-        print("[dl]    FEHLER: gh CLI nicht gefunden!")
+        print("[gh]    FEHLER: gh CLI nicht gefunden!")
         print("        Installiere: https://cli.github.com/")
+    return gh
+
+
+def create_release(version):
+    """Erstellt Tag, pusht, wartet auf CI und laedt Artefakte herunter."""
+    gh = _find_gh()
+    if gh is None:
+        return False
+
+    # Pruefen ob Tag schon existiert
+    result = subprocess.run(
+        ["git", "tag", "-l", version],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if version in result.stdout.strip().splitlines():
+        print(f"[tag]   FEHLER: Tag {version} existiert bereits!")
+        return False
+
+    # Uncommitted changes pruefen
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if status.stdout.strip():
+        print("[git]   Uncommitted Aenderungen gefunden, committe ...")
+        subprocess.run(["git", "add", "-A"], cwd=SCRIPT_DIR)
+        subprocess.run(
+            ["git", "commit", "-m", f"Release {version}"],
+            cwd=SCRIPT_DIR
+        )
+
+    # Tag erstellen und pushen
+    print(f"[tag]   Erstelle Tag: {version}")
+    subprocess.run(["git", "tag", version], cwd=SCRIPT_DIR, check=True)
+
+    print("[git]   Pushe commits und tag ...")
+    subprocess.run(["git", "push"], cwd=SCRIPT_DIR, check=True)
+    subprocess.run(["git", "push", "--tags"], cwd=SCRIPT_DIR, check=True)
+
+    # Auf CI warten
+    print("[ci]    Warte auf GitHub Actions Workflow ...")
+    print("        (Das kann einige Minuten dauern)")
+
+    # Kurz warten damit GitHub den Workflow startet
+    time.sleep(5)
+
+    # Workflow-Run finden und warten
+    watch_result = subprocess.run(
+        [gh, "run", "watch", "--exit-status"],
+        capture_output=False, text=True, cwd=SCRIPT_DIR
+    )
+    if watch_result.returncode != 0:
+        print("[ci]    FEHLER: Workflow fehlgeschlagen!")
+        print(f"        Pruefe: gh run list")
+        return False
+
+    print("[ci]    Workflow erfolgreich abgeschlossen!")
+    print()
+
+    # Release-Artefakte herunterladen
+    return download_release()
+
+
+def download_release():
+    """Laedt die Standalone-ZIPs vom neuesten GitHub Release herunter."""
+    gh = _find_gh()
+    if gh is None:
         return False
 
     os.makedirs(RELEASE_DIR, exist_ok=True)
@@ -345,16 +446,36 @@ def download_release():
     return downloaded > 0
 
 
+def _build_source():
+    """Baut das Source-Bundle (ZIP)."""
+    clean_build()
+    compile_ui()
+    create_dirs()
+    copy_files()
+    write_readme()
+    create_zip()
+    print()
+    print("--- Source-Release ---")
+    print(f"  ZIP:  {ZIP_PATH}")
+
+
 def main():
     ci_standalone = "--standalone" in sys.argv
-    no_download = "--no-download" in sys.argv
+    ci_source = "--source" in sys.argv
+
+    # Aktuelle Version anzeigen
+    major, minor, patch = read_version()
+    current_ver = f"v{major}.{minor}.{patch}"
 
     print("=" * 40)
     print("  KuchenApp Release Build")
     if ci_standalone:
         print(f"  Modus: Standalone ({OS_TAG})")
+    elif ci_source:
+        print("  Modus: Source-Bundle (CI)")
     else:
-        print("  Modus: Source-Bundle")
+        print(f"  Modus: Release")
+        print(f"  Aktuelle Version: {current_ver}")
     print("=" * 40)
     print()
 
@@ -371,20 +492,16 @@ def main():
         else:
             print("[exe]   Standalone-Build fehlgeschlagen.")
             sys.exit(1)
-    else:
-        clean_build()
-        compile_ui()
-        create_dirs()
-        copy_files()
-        write_readme()
-        create_zip()
-        print()
-        print("--- Source-Release ---")
-        print(f"  ZIP:  {ZIP_PATH}")
 
-        if not no_download:
-            print()
-            download_release()
+    elif ci_source:
+        _build_source()
+
+    else:
+        # Normaler Aufruf: Patch hochzaehlen, Source bauen, Release erstellen
+        release_version = bump_patch()
+        _build_source()
+        print()
+        create_release(release_version)
 
     print()
     print("Fertig!")
