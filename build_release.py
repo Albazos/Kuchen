@@ -2,23 +2,15 @@
 """
 Build-Skript fuer KuchenApp Release.
 
-Erstellt aus den Quelldateien:
-  1) Eine strukturierte Source-Release-Version (KuchenApp.zip)
-  2) Eine standalone Anwendung fuer Linux
-  3) Eine standalone Anwendung fuer Windows
-
 Ausfuehren:
-  python3 build_release.py            # Alle 3 Versionen
-  python3 build_release.py --source   # Nur Source-Bundle
-  python3 build_release.py --linux    # Nur Linux Standalone
-  python3 build_release.py --windows  # Nur Windows Standalone
+  python3 build_release.py                # Source bauen + Standalone-ZIPs
+                                          # vom GitHub Release herunterladen
+  python3 build_release.py --no-download  # Nur Source bauen, kein Download
 
-Die Version fuer das aktuelle OS wird lokal gebaut (PyInstaller).
-Die Version fuer das andere OS wird via GitHub Actions gebaut.
-
-Voraussetzungen fuer Remote-Build:
-  - gh CLI installiert und authentifiziert (gh auth login)
-  - GitHub Repository konfiguriert
+Standalone-Builds (Linux + Windows) werden ueber GitHub Actions erstellt:
+  git tag v1.0.0 && git push --tags
+  -> CI baut Source + Linux Standalone + Windows Standalone
+  -> GitHub Release mit allen 3 ZIPs
 """
 
 import json
@@ -27,7 +19,6 @@ import platform
 import shutil
 import subprocess
 import sys
-import time
 import zipfile
 
 # --- Konfiguration ---
@@ -39,8 +30,6 @@ BUILD_DIR = os.path.join(RELEASE_DIR, "KuchenApp")
 ZIP_PATH = os.path.join(RELEASE_DIR, "KuchenApp.zip")
 
 OS_TAG = platform.system().lower()  # "linux" oder "windows"
-STANDALONE_DIR = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}")
-STANDALONE_ZIP_PATH = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
 
 # Dateien die nach src/ kopiert werden
 SRC_FILES = [
@@ -229,7 +218,10 @@ def create_zip():
 
 
 def build_standalone():
-    """Erstellt eine standalone Anwendung mit PyInstaller."""
+    """Erstellt eine standalone Anwendung mit PyInstaller (nur fuer CI)."""
+    standalone_dir = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}")
+    standalone_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
+
     pyinstaller = shutil.which("pyinstaller")
     if pyinstaller is None:
         prefix = os.path.dirname(sys.executable)
@@ -250,7 +242,7 @@ def build_standalone():
         "--onefile",
         "--windowed",
         "--name", "KuchenApp",
-        "--distpath", STANDALONE_DIR,
+        "--distpath", standalone_dir,
         "--workpath", os.path.join(RELEASE_DIR, "_pybuild"),
         "--specpath", os.path.join(RELEASE_DIR, "_pybuild"),
         "--add-data", f"{data_dir}{os.pathsep}Data",
@@ -270,180 +262,129 @@ def build_standalone():
         shutil.rmtree(pybuild)
 
     # Data/ neben die exe kopieren (wird zur Laufzeit beschrieben)
-    standalone_data = os.path.join(STANDALONE_DIR, "Data")
+    standalone_data = os.path.join(standalone_dir, "Data")
     shutil.copytree(data_dir, standalone_data)
 
-    print(f"[exe]   Standalone erstellt: {STANDALONE_DIR}")
+    print(f"[exe]   Standalone erstellt: {standalone_dir}")
 
     # ZIP fuer Standalone erstellen
-    with zipfile.ZipFile(STANDALONE_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(STANDALONE_DIR):
+    with zipfile.ZipFile(standalone_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(standalone_dir):
             for file in files:
                 full_path = os.path.join(root, file)
-                arcname = os.path.join(f"KuchenApp_standalone_{OS_TAG}", os.path.relpath(full_path, STANDALONE_DIR))
+                arcname = os.path.join(f"KuchenApp_standalone_{OS_TAG}", os.path.relpath(full_path, standalone_dir))
                 zf.write(full_path, arcname)
-    size_mb = os.path.getsize(STANDALONE_ZIP_PATH) / (1024 * 1024)
-    print(f"[zip]   {STANDALONE_ZIP_PATH}")
+    size_mb = os.path.getsize(standalone_zip) / (1024 * 1024)
+    print(f"[zip]   {standalone_zip}")
     print(f"        Groesse: {size_mb:.1f} MB")
     return True
 
 
-def _run_gh(args):
-    """Fuehrt einen gh CLI Befehl aus und gibt stdout zurueck."""
-    result = subprocess.run(
-        ["gh"] + args, capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip())
-    return result.stdout.strip()
-
-
-def build_remote_standalone():
-    """Baut die Standalone-Version fuer das andere OS via GitHub Actions."""
-    if shutil.which("gh") is None:
-        print("[remote] FEHLER: gh CLI nicht gefunden!")
-        print("         Installiere: https://cli.github.com/")
+def download_release():
+    """Laedt die Standalone-ZIPs vom neuesten GitHub Release herunter."""
+    gh = shutil.which("gh")
+    if gh is None:
+        # Bekannter Installationspfad auf Windows
+        candidate = os.path.join("C:\\", "Program Files", "GitHub CLI", "gh.exe")
+        if os.path.isfile(candidate):
+            gh = candidate
+    if gh is None:
+        print("[dl]    FEHLER: gh CLI nicht gefunden!")
+        print("        Installiere: https://cli.github.com/")
         return False
 
-    remote_os = "windows" if OS_TAG == "linux" else "linux"
-    print(f"[remote] Starte GitHub Actions Build fuer {remote_os} ...")
+    os.makedirs(RELEASE_DIR, exist_ok=True)
 
-    # Workflow triggern
+    # Neuestes Release finden
     try:
-        _run_gh(["workflow", "run", "build_release.yml"])
-    except RuntimeError as e:
-        print(f"[remote] FEHLER beim Triggern: {e}")
-        return False
-
-    # Warten bis der Run gestartet ist
-    print("[remote] Warte auf Workflow-Start ...")
-    time.sleep(5)
-
-    # Neuesten Run finden
-    try:
-        runs_json = _run_gh([
-            "run", "list",
-            "--workflow", "build_release.yml",
-            "--limit", "1",
-            "--json", "databaseId,status"
-        ])
-        runs = json.loads(runs_json)
-        if not runs:
-            print("[remote] FEHLER: Kein Workflow-Run gefunden")
+        result = subprocess.run(
+            [gh, "release", "view", "--json", "tagName,assets"],
+            capture_output=True, text=True, cwd=SCRIPT_DIR
+        )
+        if result.returncode != 0:
+            print(f"[dl]    FEHLER: {result.stderr.strip()}")
             return False
-        run_id = str(runs[0]["databaseId"])
-    except (RuntimeError, json.JSONDecodeError, KeyError) as e:
-        print(f"[remote] FEHLER: {e}")
+        release_info = json.loads(result.stdout)
+        tag = release_info.get("tagName", "unbekannt")
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"[dl]    FEHLER: {e}")
         return False
 
-    # Auf Abschluss warten
-    print(f"[remote] Warte auf Run {run_id} ...")
-    try:
-        _run_gh(["run", "watch", run_id, "--exit-status"])
-    except RuntimeError as e:
-        print(f"[remote] FEHLER: Workflow fehlgeschlagen: {e}")
-        return False
+    print(f"[dl]    Neuestes Release: {tag}")
 
-    # Artifact herunterladen
-    artifact_name = f"KuchenApp-standalone-{remote_os}"
-    remote_zip_name = f"KuchenApp_standalone_{remote_os}.zip"
-    download_dir = os.path.join(RELEASE_DIR, "_remote_download")
-    os.makedirs(download_dir, exist_ok=True)
+    # Assets herunterladen
+    targets = [
+        "KuchenApp_standalone_linux.zip",
+        "KuchenApp_standalone_windows.zip",
+        "KuchenApp_source.zip",
+    ]
+    assets = {a["name"]: a for a in release_info.get("assets", [])}
+    downloaded = 0
 
-    print(f"[remote] Lade Artifact '{artifact_name}' herunter ...")
-    try:
-        _run_gh([
-            "run", "download", run_id,
-            "--name", artifact_name,
-            "--dir", download_dir
-        ])
-    except RuntimeError as e:
-        print(f"[remote] FEHLER beim Download: {e}")
-        return False
+    for filename in targets:
+        if filename not in assets:
+            print(f"[dl]    {filename} nicht im Release vorhanden, uebersprungen")
+            continue
+        target_path = os.path.join(RELEASE_DIR, filename)
+        print(f"[dl]    Lade {filename} herunter ...")
+        dl_result = subprocess.run(
+            [gh, "release", "download", tag,
+             "--pattern", filename,
+             "--dir", RELEASE_DIR, "--clobber"],
+            capture_output=True, text=True, cwd=SCRIPT_DIR
+        )
+        if dl_result.returncode != 0:
+            print(f"[dl]    FEHLER bei {filename}: {dl_result.stderr.strip()}")
+            continue
+        if os.path.isfile(target_path):
+            size_mb = os.path.getsize(target_path) / (1024 * 1024)
+            print(f"        -> {target_path} ({size_mb:.1f} MB)")
+            downloaded += 1
 
-    # ZIP in release/ verschieben
-    downloaded_zip = os.path.join(download_dir, remote_zip_name)
-    target_zip = os.path.join(RELEASE_DIR, remote_zip_name)
-    if os.path.isfile(downloaded_zip):
-        shutil.move(downloaded_zip, target_zip)
-    else:
-        # gh download entpackt manchmal in einen Unterordner
-        for root, dirs, files in os.walk(download_dir):
-            for f in files:
-                if f == remote_zip_name:
-                    shutil.move(os.path.join(root, f), target_zip)
-                    break
-
-    # Aufraemen
-    if os.path.exists(download_dir):
-        shutil.rmtree(download_dir)
-
-    if os.path.isfile(target_zip):
-        # ZIP auch in Ordner entpacken
-        remote_dir = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{remote_os}")
-        os.makedirs(remote_dir, exist_ok=True)
-        with zipfile.ZipFile(target_zip, "r") as zf:
-            for member in zf.namelist():
-                # Ersten Pfadteil (Archiv-Ordnername) entfernen
-                parts = member.split("/", 1)
-                if len(parts) > 1 and parts[1]:
-                    target_path = os.path.join(remote_dir, parts[1])
-                    if member.endswith("/"):
-                        os.makedirs(target_path, exist_ok=True)
-                    else:
-                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
-                        with zf.open(member) as src, open(target_path, "wb") as dst:
-                            shutil.copyfileobj(src, dst)
-
-        size_mb = os.path.getsize(target_zip) / (1024 * 1024)
-        print(f"[remote] {target_zip}")
-        print(f"[remote] {remote_dir}")
-        print(f"         Groesse: {size_mb:.1f} MB")
-        return True
-    else:
-        print(f"[remote] FEHLER: {remote_zip_name} nicht gefunden")
-        return False
+    print(f"[dl]    {downloaded} Datei(en) heruntergeladen nach release/")
+    return downloaded > 0
 
 
 def main():
+    ci_standalone = "--standalone" in sys.argv
+    no_download = "--no-download" in sys.argv
+
     print("=" * 40)
     print("  KuchenApp Release Build")
+    if ci_standalone:
+        print(f"  Modus: Standalone ({OS_TAG})")
+    else:
+        print("  Modus: Source-Bundle")
     print("=" * 40)
     print()
 
-    clean_build()
-    compile_ui()
-
-    # Source-Bundle
-    create_dirs()
-    copy_files()
-    write_readme()
-    create_zip()
-    print()
-    print("--- Source-Release ---")
-    print(f"  ZIP:  {ZIP_PATH}")
-
-    local_os = OS_TAG  # "linux" oder "windows"
-    remote_os = "windows" if local_os == "linux" else "linux"
-
-    # Lokales OS bauen (Linux oder Windows)
-    print()
-    if build_standalone():
-        print()
-        print(f"--- Standalone {local_os.capitalize()} ---")
-        print(f"  ZIP:  {STANDALONE_ZIP_PATH}")
+    if ci_standalone:
+        clean_build()
+        compile_ui()
+        create_dirs()
+        copy_files()
+        if build_standalone():
+            print()
+            print(f"--- Standalone {OS_TAG.capitalize()} ---")
+            standalone_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
+            print(f"  ZIP:  {standalone_zip}")
+        else:
+            print("[exe]   Standalone-Build fehlgeschlagen.")
+            sys.exit(1)
     else:
-        print("[exe]   Lokaler Standalone-Build fehlgeschlagen.")
-
-    # Remote OS bauen (das jeweils andere)
-    print()
-    if build_remote_standalone():
-        remote_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{remote_os}.zip")
+        clean_build()
+        compile_ui()
+        create_dirs()
+        copy_files()
+        write_readme()
+        create_zip()
         print()
-        print(f"--- Standalone {remote_os.capitalize()} (remote) ---")
-        print(f"  ZIP:  {remote_zip}")
-    else:
-        print(f"[remote] {remote_os.capitalize()}-Build fehlgeschlagen.")
+        print("--- Source-Release ---")
+        print(f"  ZIP:  {ZIP_PATH}")
+
+        if not no_download:
+            print()
+            download_release()
 
     print()
     print("Fertig!")

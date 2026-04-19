@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: pip install PySide6 pyinstaller
 
-      - name: Build release
-        run: python build_release.py
+      - name: Build standalone
+        run: python build_release.py --standalone
 
       - name: Upload Standalone ZIP
         uses: actions/upload-artifact@v4
@@ -36,8 +36,23 @@ jobs:
           name: KuchenApp-standalone-${{ matrix.os_name }}
           path: release/KuchenApp_standalone_${{ matrix.os_name }}.zip
 
+  source:
+    name: Source Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install PySide6
+
+      - name: Build source
+        run: python build_release.py --source
+
       - name: Upload Source Bundle
-        if: matrix.os_name == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: KuchenApp-source
@@ -45,7 +60,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [standalone]
+    needs: [standalone, source]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
