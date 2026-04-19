@@ -329,7 +329,7 @@ def _find_gh():
 
 
 def create_release(version):
-    """Erstellt Tag, pusht, wartet auf CI und laedt Artefakte herunter."""
+    """Erstellt Release lokal mit gh, wartet auf CI, laedt Standalone herunter."""
     gh = _find_gh()
     if gh is None:
         return False
@@ -343,107 +343,100 @@ def create_release(version):
         print(f"[tag]   FEHLER: Tag {version} existiert bereits!")
         return False
 
-    # Uncommitted changes pruefen
+    # Uncommitted changes committen (inkl. version.ini)
+    subprocess.run(["git", "add", "-A"], cwd=SCRIPT_DIR)
     status = subprocess.run(
         ["git", "status", "--porcelain"],
         capture_output=True, text=True, cwd=SCRIPT_DIR
     )
     if status.stdout.strip():
-        print("[git]   Uncommitted Aenderungen gefunden, committe ...")
-        subprocess.run(["git", "add", "-A"], cwd=SCRIPT_DIR)
+        print("[git]   Committe Aenderungen ...")
         subprocess.run(
             ["git", "commit", "-m", f"Release {version}"],
-            cwd=SCRIPT_DIR
+            cwd=SCRIPT_DIR, check=True
         )
 
-    # Tag erstellen und pushen
-    print(f"[tag]   Erstelle Tag: {version}")
-    subprocess.run(["git", "tag", version], cwd=SCRIPT_DIR, check=True)
-
-    print("[git]   Pushe commits und tag ...")
+    # Pushen
+    print("[git]   Pushe commits ...")
     subprocess.run(["git", "push"], cwd=SCRIPT_DIR, check=True)
-    subprocess.run(["git", "push", "--tags"], cwd=SCRIPT_DIR, check=True)
 
-    # Auf CI warten
+    # GitHub Release erstellen (laedt Source-ZIP sofort hoch)
+    print(f"[gh]    Erstelle GitHub Release {version} ...")
+    create_result = subprocess.run(
+        [gh, "release", "create", version, ZIP_PATH,
+         "--title", f"KuchenApp {version}",
+         "--notes", f"Automatisches Release {version}"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if create_result.returncode != 0:
+        print(f"[gh]    FEHLER: {create_result.stderr.strip()}")
+        return False
+    print(f"[gh]    Release {version} erstellt (Source-ZIP hochgeladen)")
+
+    # Auf CI warten (baut Standalone fuer Linux + Windows)
     print("[ci]    Warte auf GitHub Actions Workflow ...")
     print("        (Das kann einige Minuten dauern)")
+    time.sleep(10)
 
-    # Kurz warten damit GitHub den Workflow startet
-    time.sleep(5)
-
-    # Workflow-Run finden und warten
     watch_result = subprocess.run(
         [gh, "run", "watch", "--exit-status"],
         capture_output=False, text=True, cwd=SCRIPT_DIR
     )
     if watch_result.returncode != 0:
         print("[ci]    FEHLER: Workflow fehlgeschlagen!")
-        print(f"        Pruefe: gh run list")
+        print("        Pruefe: gh run list")
         return False
 
     print("[ci]    Workflow erfolgreich abgeschlossen!")
     print()
 
-    # Release-Artefakte herunterladen
-    return download_release()
+    # Standalone-ZIPs vom Release herunterladen
+    return download_release(version)
 
 
-def download_release():
-    """Laedt die Standalone-ZIPs vom neuesten GitHub Release herunter."""
+def download_release(version=None):
+    """Laedt die Standalone-ZIPs vom GitHub Release herunter."""
     gh = _find_gh()
     if gh is None:
         return False
 
     os.makedirs(RELEASE_DIR, exist_ok=True)
 
-    # Neuestes Release finden
-    try:
-        result = subprocess.run(
-            [gh, "release", "view", "--json", "tagName,assets"],
-            capture_output=True, text=True, cwd=SCRIPT_DIR
-        )
-        if result.returncode != 0:
-            print(f"[dl]    FEHLER: {result.stderr.strip()}")
+    # Version bestimmen
+    if version is None:
+        try:
+            result = subprocess.run(
+                [gh, "release", "view", "--json", "tagName"],
+                capture_output=True, text=True, cwd=SCRIPT_DIR
+            )
+            if result.returncode != 0:
+                print(f"[dl]    FEHLER: {result.stderr.strip()}")
+                return False
+            version = json.loads(result.stdout).get("tagName", "")
+        except (json.JSONDecodeError, KeyError) as e:
+            print(f"[dl]    FEHLER: {e}")
             return False
-        release_info = json.loads(result.stdout)
-        tag = release_info.get("tagName", "unbekannt")
-    except (json.JSONDecodeError, KeyError) as e:
-        print(f"[dl]    FEHLER: {e}")
+
+    print(f"[dl]    Lade von Release {version} herunter ...")
+    dl_result = subprocess.run(
+        [gh, "release", "download", version,
+         "--pattern", "KuchenApp_standalone_*.zip",
+         "--dir", RELEASE_DIR, "--clobber"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if dl_result.returncode != 0:
+        print(f"[dl]    FEHLER: {dl_result.stderr.strip()}")
         return False
 
-    print(f"[dl]    Neuestes Release: {tag}")
+    # Heruntergeladene Dateien auflisten
+    for f in os.listdir(RELEASE_DIR):
+        if f.startswith("KuchenApp_standalone_") and f.endswith(".zip"):
+            path = os.path.join(RELEASE_DIR, f)
+            size_mb = os.path.getsize(path) / (1024 * 1024)
+            print(f"[dl]    {f} ({size_mb:.1f} MB)")
 
-    # Assets herunterladen
-    targets = [
-        "KuchenApp_standalone_linux.zip",
-        "KuchenApp_standalone_windows.zip",
-        "KuchenApp_source.zip",
-    ]
-    assets = {a["name"]: a for a in release_info.get("assets", [])}
-    downloaded = 0
-
-    for filename in targets:
-        if filename not in assets:
-            print(f"[dl]    {filename} nicht im Release vorhanden, uebersprungen")
-            continue
-        target_path = os.path.join(RELEASE_DIR, filename)
-        print(f"[dl]    Lade {filename} herunter ...")
-        dl_result = subprocess.run(
-            [gh, "release", "download", tag,
-             "--pattern", filename,
-             "--dir", RELEASE_DIR, "--clobber"],
-            capture_output=True, text=True, cwd=SCRIPT_DIR
-        )
-        if dl_result.returncode != 0:
-            print(f"[dl]    FEHLER bei {filename}: {dl_result.stderr.strip()}")
-            continue
-        if os.path.isfile(target_path):
-            size_mb = os.path.getsize(target_path) / (1024 * 1024)
-            print(f"        -> {target_path} ({size_mb:.1f} MB)")
-            downloaded += 1
-
-    print(f"[dl]    {downloaded} Datei(en) heruntergeladen nach release/")
-    return downloaded > 0
+    print(f"[dl]    Download abgeschlossen -> {RELEASE_DIR}")
+    return True
 
 
 def _build_source():

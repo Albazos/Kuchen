@@ -1,86 +1,37 @@
-name: Build KuchenApp Release
+name: Build Standalone Releases
 
 on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  standalone:
-    name: Standalone (${{ matrix.os_name }})
-    runs-on: ${{ matrix.runner }}
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            os_name: linux
-          - runner: windows-latest
-            os_name: windows
-    steps:
-      - uses: actions/checkout@v4
+        os: [ubuntu-latest, windows-latest]
 
-      - uses: actions/setup-python@v5
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pip install PySide6 pyinstaller
 
-      - name: Build standalone
+      - name: Build Standalone
         run: python build_release.py --standalone
 
-      - name: Upload Standalone ZIP
-        uses: actions/upload-artifact@v4
-        with:
-          name: KuchenApp-standalone-${{ matrix.os_name }}
-          path: release/KuchenApp_standalone_${{ matrix.os_name }}.zip
-
-  source:
-    name: Source Bundle
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install PySide6
-
-      - name: Build source
-        run: python build_release.py --source
-
-      - name: Upload Source Bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: KuchenApp-source
-          path: release/KuchenApp.zip
-
-  release:
-    name: Create GitHub Release
-    needs: [standalone, source]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Collect ZIPs
-        run: |
-          mkdir release-files
-          cp artifacts/KuchenApp-source/KuchenApp.zip release-files/KuchenApp_source.zip
-          cp artifacts/KuchenApp-standalone-linux/KuchenApp_standalone_linux.zip release-files/
-          cp artifacts/KuchenApp-standalone-windows/KuchenApp_standalone_windows.zip release-files/
-
-      - name: Create Release
+      - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          name: KuchenApp ${{ github.ref_name }}
-          generate_release_notes: true
-          files: release-files/*
+          files: release/KuchenApp_standalone_*.zip
