@@ -36,26 +36,36 @@ class Ui_Dialog(object):
 
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
+        self.labServer = QLabel(Dialog)
+        self.labServer.setObjectName(u"labServer")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labServer)
+
+        self.ledServer = QLineEdit(Dialog)
+        self.ledServer.setObjectName(u"ledServer")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.ledServer)
+
         self.labMail = QLabel(Dialog)
         self.labMail.setObjectName(u"labMail")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labMail)
-
-        self.labPsw = QLabel(Dialog)
-        self.labPsw.setObjectName(u"labPsw")
-
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labPsw)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labMail)
 
         self.ledUser = QLineEdit(Dialog)
         self.ledUser.setObjectName(u"ledUser")
 
-        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.ledUser)
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.ledUser)
+
+        self.labPsw = QLabel(Dialog)
+        self.labPsw.setObjectName(u"labPsw")
+
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.LabelRole, self.labPsw)
 
         self.ledPsw = QLineEdit(Dialog)
         self.ledPsw.setObjectName(u"ledPsw")
         self.ledPsw.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.ledPsw)
+        self.formLayout.setWidget(2, QFormLayout.ItemRole.FieldRole, self.ledPsw)
 
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -87,6 +97,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
         self.labInfo.setText(QCoreApplication.translate("Dialog", u"Iserv Mail Login", None))
+        self.labServer.setText(QCoreApplication.translate("Dialog", u"IServ Server", None))
         self.labMail.setText(QCoreApplication.translate("Dialog", u"Username", None))
         self.labPsw.setText(QCoreApplication.translate("Dialog", u"Password", None))
         self.pbnLogin.setText(QCoreApplication.translate("Dialog", u"Login", None))

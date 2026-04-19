@@ -29,23 +29,33 @@
      <item>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
+        <widget class="QLabel" name="labServer">
+         <property name="text">
+          <string>IServ Server</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="ledServer"/>
+       </item>
+       <item row="1" column="0">
         <widget class="QLabel" name="labMail">
          <property name="text">
           <string>Username</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="ledUser"/>
+       </item>
+       <item row="2" column="0">
         <widget class="QLabel" name="labPsw">
          <property name="text">
           <string>Password</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="ledUser"/>
-       </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="ledPsw">
          <property name="echoMode">
           <enum>QLineEdit::EchoMode::Password</enum>
