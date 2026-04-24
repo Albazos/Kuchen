@@ -1,0 +1,367 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- Pakete ---
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{tikz}
+
+\tcbuselibrary{skins, breakable}
+
+\geometry{left=2.5cm, right=2.5cm, top=2.8cm, bottom=2.5cm, headheight=25pt}
+
+% --- Farben ---
+\definecolor{primary}{RGB}{41, 98, 155}
+\definecolor{accent}{RGB}{231, 76, 60}
+\definecolor{success}{RGB}{39, 174, 96}
+\definecolor{infoblue}{RGB}{52, 152, 219}
+\definecolor{warnorg}{RGB}{243, 156, 18}
+\definecolor{codebg}{RGB}{248, 249, 250}
+\definecolor{codeborder}{RGB}{222, 226, 230}
+\definecolor{codegray}{RGB}{108, 117, 125}
+\definecolor{sectioncolor}{RGB}{41, 98, 155}
+
+% --- Abschnitt-Stil ---
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{sectioncolor}}
+  {\thesection}{1em}{}[\color{sectioncolor}\titlerule]
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{sectioncolor!80!black}}
+  {\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{sectioncolor!60!black}}
+  {\thesubsubsection}{0.6em}{}
+
+% --- tcolorbox Stile ---
+\newtcolorbox{infobox}[1][]{
+    colback=infoblue!5,
+    colframe=infoblue!70,
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=infoblue,
+    boxrule=0.5pt,
+    arc=3pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={#1},
+    breakable,
+}
+
+\newtcolorbox{warnbox}[1][]{
+    colback=warnorg!5,
+    colframe=warnorg!70,
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=warnorg,
+    boxrule=0.5pt,
+    arc=3pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={#1},
+    breakable,
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=success!5,
+    colframe=success!70,
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=success,
+    boxrule=0.5pt,
+    arc=3pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={#1},
+    breakable,
+}
+
+\newtcolorbox{stepbox}[1][]{
+    colback=primary!5,
+    colframe=primary!70,
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=primary,
+    boxrule=0.5pt,
+    arc=3pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={#1},
+    breakable,
+}
+
+% --- Header/Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\color{sectioncolor}\textbf{KuchenApp} \color{codegray}-- Benutzerdokumentation}
+\fancyhead[R]{\color{codegray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{sectioncolor}\leaders\hrule height \headrulewidth\hfill}}
+
+% --- Hyperlinks ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    urlcolor=infoblue,
+}
+
+% =====================================================================
+\begin{document}
+
+% --- Titelseite ---
+\begin{titlepage}
+\centering
+\begin{tikzpicture}[remember picture, overlay]
+    \fill[primary] (current page.north west) rectangle ([yshift=-6cm]current page.north east);
+    \fill[primary!80!black] ([yshift=-6cm]current page.north west) rectangle ([yshift=-6.3cm]current page.north east);
+\end{tikzpicture}
+
+\vspace*{1cm}
+{\color{white}\Huge\textbf{KuchenApp}}\\[0.4cm]
+{\color{white!85}\LARGE Benutzerdokumentation}\\[4.5cm]
+
+{\Large\color{primary} Anleitung zur Bedienung der\\[0.3cm]
+KuchenApp fuer Endanwender}\\[2.5cm]
+
+\begin{tcolorbox}[
+    colback=codebg, colframe=codeborder,
+    width=10cm, arc=4pt, boxrule=0.5pt,
+    halign=center,
+]
+\begin{tabular}{rl}
+    \textbf{Anwendung:} & KuchenApp \\
+    \textbf{Plattformen:} & Linux \& Windows \\
+    \textbf{Zielgruppe:} & Klassensprecher / Lehrkraft \\
+    \textbf{Stand:} & \today \\
+\end{tabular}
+\end{tcolorbox}
+
+\vfill
+{\color{codegray}\small Berufsschule -- Fachinformatiker Anwendungsentwicklung}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Einleitung}
+
+Diese Benutzerdokumentation richtet sich an die Anwender der \textbf{KuchenApp}. Sie
+beschreibt Schritt fuer Schritt, wie die Anwendung installiert, gestartet und
+bedient wird. Technische Hintergrund\-informationen sind in der separaten
+\emph{Projektdokumentation} zu finden.
+
+\begin{infobox}[Was kann die KuchenApp?]
+Die KuchenApp hilft dir dabei, eine Liste an Personen zu verwalten, die fuer einen
+bestimmten Termin Kuchen mitbringen. Mit einem Klick erstellt sie dir eine
+Erinnerungs-E-Mail und verschickt sie ueber dein IServ-Konto an alle Empfaenger.
+\end{infobox}
+
+% =====================================================================
+\section{Installation}
+
+\subsection{Systemvoraussetzungen}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Betriebssystem: Windows 10/11 oder Linux (64-Bit)
+    \item Internetverbindung (nur fuer den Mail-Versand erforderlich)
+    \item Gueltiges IServ-Konto der Schule
+\end{itemize}
+
+\subsection{Installation unter Windows}
+
+\begin{stepbox}[Schritt fuer Schritt]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Lade die aktuelle Version von der GitHub-Releases-Seite herunter:\\
+          \url{https://github.com/Albazos/Kuchen/releases}
+    \item Entpacke die ZIP-Datei in einen Ordner deiner Wahl.
+    \item Starte die Anwendung per Doppelklick auf \texttt{KuchenApp.exe}.
+\end{enumerate}
+\end{stepbox}
+
+\subsection{Installation unter Linux}
+
+\begin{stepbox}[Schritt fuer Schritt]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Lade die Linux-Version von der Releases-Seite herunter.
+    \item Entpacke das Archiv: \texttt{tar -xzf KuchenApp-linux.tar.gz}
+    \item Mache die Datei ausfuehrbar: \texttt{chmod +x KuchenApp}
+    \item Starte die Anwendung mit: \texttt{./KuchenApp}
+\end{enumerate}
+\end{stepbox}
+
+\begin{warnbox}[Hinweis zur Windows-Sicherheitswarnung]
+Beim ersten Start erscheint unter Windows ggf. der \emph{SmartScreen}-Warnhinweis,
+da die Anwendung nicht signiert ist. Klicke auf \emph{Weitere Informationen}
+$\rightarrow$ \emph{Trotzdem ausfuehren}, um die App zu starten.
+\end{warnbox}
+
+% =====================================================================
+\section{Das Hauptfenster im Ueberblick}
+
+Nach dem Start zeigt die KuchenApp das Hauptfenster mit folgenden Bereichen:
+
+\begin{center}
+\begin{tabularx}{\linewidth}{l X}
+\toprule
+\textbf{Bereich} & \textbf{Funktion} \\
+\midrule
+\textbf{Tabelle} & Zeigt die aktuelle Kuchen-Liste an. Zellen koennen direkt bearbeitet werden. \\
+\textbf{Suche} & Filtert die Tabelle nach dem eingegebenen Begriff. \\
+\textbf{Sort} & Auswahl der Spalte, nach der sortiert wird (auf-/absteigend). \\
+\textbf{Buttons} & Aktionen wie Importieren, Speichern, Hinzufuegen, Loeschen, Mailliste, Senden. \\
+\textbf{Statuszeile} & Zeigt Erfolgs- bzw. Fehlermeldungen an. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% =====================================================================
+\section{Arbeiten mit der Kuchen-Liste}
+
+\subsection{CSV-Datei importieren}
+
+\begin{stepbox}[Datei oeffnen]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Klicke auf den Button \textbf{Import}.
+    \item Waehle im Dateidialog die gewuenschte CSV-Datei aus.
+    \item Bestaetige mit \emph{Oeffnen}. Die Tabelle wird mit den Daten gefuellt.
+\end{enumerate}
+\end{stepbox}
+
+\begin{infobox}[CSV-Format]
+Eine gueltige CSV-Datei besteht aus einer Kopfzeile und beliebig vielen
+Datenzeilen, jeweils kommagetrennt. Beispiel:
+\begin{center}
+\texttt{Name,Datum,Status} \\
+\texttt{Max Mustermann,01.05.2026,offen} \\
+\texttt{Erika Beispiel,08.05.2026,zugesagt}
+\end{center}
+\end{infobox}
+
+\subsection{Eintraege bearbeiten, hinzufuegen oder loeschen}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Bearbeiten:} Klicke doppelt in eine Zelle und gib den neuen Wert ein.
+    \item \textbf{Hinzufuegen:} Klicke auf \textbf{Add}, um eine leere Zeile am Ende der Tabelle einzufuegen.
+    \item \textbf{Loeschen:} Markiere eine oder mehrere Zeilen und klicke auf \textbf{Delete}.
+\end{itemize}
+
+\subsection{Sortieren und Suchen}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Im Bereich \textbf{Sort} eine Spalte sowie \emph{Ascending} oder
+          \emph{Descending} auswaehlen -- die Tabelle wird sofort umsortiert.
+    \item Im Suchfeld einen Begriff eingeben -- die Tabelle zeigt nur noch
+          passende Zeilen an. Ist eine Sortier-Spalte aktiv, wird nur in dieser
+          Spalte gesucht; andernfalls wird die gesamte Tabelle durchsucht.
+\end{itemize}
+
+\subsection{Aenderungen speichern}
+
+Klicke auf \textbf{Save}, um die aktuellen Daten zurueck in die CSV-Datei zu
+schreiben. Beim Beenden der Anwendung wird ausserdem gefragt, ob ungespeicherte
+Aenderungen gesichert werden sollen.
+
+\begin{warnbox}[Datenverlust vermeiden]
+Speichere regelmaessig zwischen. Beendest du die App ueber das X des Fensters
+ohne Rueckfrage des Betriebssystems zu beachten, gehen ungesicherte Aenderungen
+verloren.
+\end{warnbox}
+
+% =====================================================================
+\section{Mailliste verwalten}
+
+\subsection{Empfaenger hinzufuegen, aendern oder entfernen}
+
+\begin{stepbox}[Mailliste oeffnen]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Klicke im Hauptfenster auf \textbf{Open Mail List}.
+    \item Es oeffnet sich ein separater Dialog mit allen aktuellen Empfaengern.
+    \item Pflege die Eintraege wie in der Hauptliste (bearbeiten, hinzufuegen,
+          loeschen) und schliesse den Dialog ueber den Schliessen-Button.
+\end{enumerate}
+\end{stepbox}
+
+\begin{infobox}[Empfaengerformat]
+Jede Zeile enthaelt einen Namen und eine gueltige IServ-E-Mail-Adresse, z.\,B.
+\texttt{vorname.nachname@meine-schule.de}.
+\end{infobox}
+
+% =====================================================================
+\section{Erinnerungs-Mails versenden}
+
+\subsection{Versand starten}
+
+\begin{stepbox}[Mails senden]
+\begin{enumerate}[leftmargin=1.5em]
+    \item Stelle sicher, dass die Kuchen-Liste und die Mailliste aktuell sind.
+    \item Klicke auf \textbf{Send Mail}.
+    \item Bestaetige die Sicherheitsabfrage \emph{"`Mail an X Empfaenger
+          senden?"'} mit \textbf{Ja}.
+    \item Im folgenden Login-Dialog deinen IServ-Benutzernamen und das
+          dazugehoerige Passwort eingeben.
+    \item Auf \textbf{Login / Senden} klicken -- die Mails werden ueber den
+          IServ-Mailserver verschickt.
+\end{enumerate}
+\end{stepbox}
+
+\begin{successbox}[Erfolgreicher Versand]
+Bei erfolgreichem Versand erscheint die Statusmeldung
+\emph{"`Mails sent successfully."'} in der unteren Statuszeile.
+\end{successbox}
+
+\subsection{Was wird verschickt?}
+
+Die App generiert automatisch eine HTML-E-Mail mit der aktuellen Kuchen-Liste
+als formatierte Tabelle. Jeder Empfaenger erhaelt dieselbe Uebersicht und kann
+so seinen Eintrag direkt erkennen.
+
+\begin{warnbox}[Hinweis zum Passwort]
+Dein IServ-Passwort wird ausschliesslich fuer den aktuellen Versand verwendet
+und \textbf{nicht} dauerhaft gespeichert. Du musst es bei jedem Versand neu
+eingeben.
+\end{warnbox}
+
+% =====================================================================
+\section{Haeufige Fragen (FAQ)}
+
+\subsection{Die Anwendung startet nicht}
+Pruefe, ob du das Archiv vollstaendig entpackt hast und die Anwendung aus dem
+entpackten Ordner heraus startest. Unter Linux muss die Datei ausfuehrbar sein
+(\texttt{chmod +x KuchenApp}).
+
+\subsection{Beim Import passiert nichts}
+Stelle sicher, dass die Datei tatsaechlich im CSV-Format vorliegt und eine
+Kopfzeile besitzt. Die Statuszeile zeigt im Fehlerfall \emph{"`Import failed"'}
+oder \emph{"`No file selected"'} an.
+
+\subsection{Die Mails werden nicht verschickt}
+Pruefe folgende Punkte:
+\begin{itemize}[leftmargin=1.5em]
+    \item Besteht eine Internetverbindung?
+    \item Sind Benutzername und Passwort korrekt?
+    \item Enthaelt die Mailliste mindestens einen gueltigen Empfaenger?
+\end{itemize}
+Erscheint die Meldung \emph{"`Failed to send mails."'}, wiederhole den Login.
+
+\subsection{Wie kann ich Aenderungen rueckgaengig machen?}
+Die App besitzt keine Undo-Funktion. Solange du die Datei \emph{nicht}
+gespeichert hast, kannst du den Import ueber \textbf{Import} erneut ausfuehren,
+um die Originaldaten wiederherzustellen.
+
+% =====================================================================
+\section{Support}
+
+Bei Fehlern oder Verbesserungsvorschlaegen erstelle bitte ein Issue im
+GitHub-Repository:\\
+\url{https://github.com/Albazos/Kuchen/issues}
+
+\end{document}
