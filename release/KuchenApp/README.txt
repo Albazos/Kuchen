@@ -33,6 +33,9 @@ Projektstruktur:
   |   |-- UIMainWindow_ui.py
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
+  |-- docs/
+  |   |-- dokumentation.pdf         <- Projektdokumentation
+  |   +-- benutzerdokumentation.pdf <- Benutzerdokumentation
   +-- Data/
       |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
       |-- Settings/

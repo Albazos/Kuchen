@@ -29,9 +29,16 @@ import zipfile
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEV_DIR = os.path.join(SCRIPT_DIR, "develop")
+DOCS_DIR = os.path.join(SCRIPT_DIR, "docs")
 RELEASE_DIR = os.path.join(SCRIPT_DIR, "release")
 BUILD_DIR = os.path.join(RELEASE_DIR, "KuchenApp")
 ZIP_PATH = os.path.join(RELEASE_DIR, "KuchenApp.zip")
+
+# Doku-PDFs die nach docs/ kopiert werden
+DOC_FILES = [
+    "dokumentation.pdf",
+    "benutzerdokumentation.pdf",
+]
 
 OS_TAG = platform.system().lower()  # "linux" oder "windows"
 
@@ -135,6 +142,9 @@ Projektstruktur:
   |   |-- UIMainWindow_ui.py
   |   |-- UIMailsDialog_ui.py
   |   +-- UILoginDialog_ui.py
+  |-- docs/
+  |   |-- dokumentation.pdf         <- Projektdokumentation
+  |   +-- benutzerdokumentation.pdf <- Benutzerdokumentation
   +-- Data/
       |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
       |-- Settings/
@@ -188,7 +198,7 @@ def clean_build():
 
 def create_dirs():
     """Erstellt die Release-Ordnerstruktur."""
-    for subdir in ["src", "ui", "assets", "Data", "Data/Klassen", "Data/Settings"]:
+    for subdir in ["src", "ui", "assets", "docs", "Data", "Data/Klassen", "Data/Settings"]:
         os.makedirs(os.path.join(BUILD_DIR, subdir), exist_ok=True)
     print("[dirs]  Ordnerstruktur erstellt")
 
@@ -209,6 +219,19 @@ def copy_files():
     # assets/
     for f in ASSET_FILES:
         shutil.copy2(os.path.join(DEV_DIR, "assets", f), os.path.join(BUILD_DIR, "assets"))
+
+    # docs/ - Doku-PDFs (falls vorhanden)
+    docs_dst = os.path.join(BUILD_DIR, "docs")
+    copied_docs = 0
+    for f in DOC_FILES:
+        src = os.path.join(DOCS_DIR, f)
+        if os.path.isfile(src):
+            shutil.copy2(src, docs_dst)
+            copied_docs += 1
+        else:
+            print(f"[docs]  WARNUNG: {f} nicht gefunden, uebersprungen")
+    if copied_docs:
+        print(f"[docs]  {copied_docs} Doku-PDF(s) kopiert")
 
     # Data/ - leere CSVs mit nur Header-Zeile erstellen
     with open(os.path.join(BUILD_DIR, "Data", "StandardCakeData.csv"), "w", newline="") as f:
@@ -305,6 +328,12 @@ def build_standalone():
     assets_dst = os.path.join(standalone_dir, "assets")
     if os.path.isdir(assets_src):
         shutil.copytree(assets_src, assets_dst)
+
+    # docs/ neben die exe kopieren (Doku-PDFs)
+    docs_src = os.path.join(BUILD_DIR, "docs")
+    docs_dst = os.path.join(standalone_dir, "docs")
+    if os.path.isdir(docs_src):
+        shutil.copytree(docs_src, docs_dst)
 
     print(f"[exe]   Standalone erstellt: {standalone_dir}")
 
