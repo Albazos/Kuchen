@@ -37,12 +37,17 @@ Projektstruktur:
   |   |-- dokumentation.pdf         <- Projektdokumentation
   |   +-- benutzerdokumentation.pdf <- Benutzerdokumentation
   +-- Data/
-      |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
+      |-- StandardCakeData.csv  <- Kuchendaten (Template)
       |-- Settings/
-      |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
+      |   +-- settings.ini     <- Neutrale Standardeinstellungen
       +-- Klassen/
-          +-- StandardKlasse.csv  <- Klassenliste (leer, nur Header)
+          +-- StandardKlasse.csv  <- Klassenliste (Template)
 
 
 Starten:
   python KuchenMain.py
+
+Hinweis zu Daten:
+  Eigene Klassen- und Kuchendaten koennen ueber CSV-Dateien gepflegt
+  oder importiert werden. Die mitgelieferten Dateien sind nur neutrale
+  Standardvorlagen.

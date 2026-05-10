@@ -24,6 +24,7 @@ import subprocess
 import sys
 import time
 import zipfile
+import argparse
 
 # --- Konfiguration ---
 
@@ -43,6 +44,31 @@ DOC_FILES = [
 OS_TAG = platform.system().lower()  # "linux" oder "windows"
 
 VERSION_INI = os.path.join(SCRIPT_DIR, "version.ini")
+
+
+def _find_executable(aBaseName):
+    """Sucht ein CLI-Tool plattformneutral im PATH und neben dem Python-Interpreter."""
+    lCandidateNames = [aBaseName]
+    if sys.platform == "win32" and not aBaseName.lower().endswith(".exe"):
+        lCandidateNames.insert(0, f"{aBaseName}.exe")
+
+    for lCandidateName in lCandidateNames:
+        lFoundPath = shutil.which(lCandidateName)
+        if lFoundPath:
+            return lFoundPath
+
+    lPythonDir = os.path.dirname(sys.executable)
+    lSearchDirs = [
+        lPythonDir,
+        os.path.join(lPythonDir, "Scripts"),
+        os.path.join(lPythonDir, "bin"),
+    ]
+    for lSearchDir in lSearchDirs:
+        for lCandidateName in lCandidateNames:
+            lCandidatePath = os.path.join(lSearchDir, lCandidateName)
+            if os.path.isfile(lCandidatePath):
+                return lCandidatePath
+    return None
 
 
 def read_version():
@@ -146,47 +172,45 @@ Projektstruktur:
   |   |-- dokumentation.pdf         <- Projektdokumentation
   |   +-- benutzerdokumentation.pdf <- Benutzerdokumentation
   +-- Data/
-      |-- StandardCakeData.csv  <- Kuchendaten (leer, nur Header)
+      |-- StandardCakeData.csv  <- Kuchendaten (Template)
       |-- Settings/
-      |   +-- settings.ini     <- Einstellungen (z.B. Klassen-Dateiname)
+      |   +-- settings.ini     <- Neutrale Standardeinstellungen
       +-- Klassen/
-          +-- StandardKlasse.csv  <- Klassenliste (leer, nur Header)
+          +-- StandardKlasse.csv  <- Klassenliste (Template)
 
 
 Starten:
   python KuchenMain.py
+
+Hinweis zu Daten:
+  Eigene Klassen- und Kuchendaten koennen ueber CSV-Dateien gepflegt
+  oder importiert werden. Die mitgelieferten Dateien sind nur neutrale
+  Standardvorlagen.
 """
 
 
 def compile_ui():
     """Kompiliert .ui Dateien zu _ui.py mit pyside6-uic."""
-    # pyside6-uic aus dem gleichen Python-Environment nutzen
-    uic = shutil.which("pyside6-uic")
-    if uic is None:
-        # Fallback: im gleichen Prefix wie das aktuelle Python suchen
-        prefix = os.path.dirname(sys.executable)
-        candidate = os.path.join(prefix, "pyside6-uic")
-        if os.path.isfile(candidate):
-            uic = candidate
-    if uic is None:
+    lUic = _find_executable("pyside6-uic")
+    if lUic is None:
         print("[ui]    FEHLER: pyside6-uic nicht gefunden!")
         print("        Installiere PySide6: pip install PySide6")
         sys.exit(1)
 
-    count = 0
-    for ui_file, py_file in UI_SOURCE_FILES.items():
-        ui_path = os.path.join(DEV_DIR, "ui", ui_file)
-        py_path = os.path.join(DEV_DIR, "ui", py_file)
-        if not os.path.isfile(ui_path):
-            print(f"[ui]    WARNUNG: {ui_file} nicht gefunden, uebersprungen")
+    lCount = 0
+    for lUiFile, lPyFile in UI_SOURCE_FILES.items():
+        lUiPath = os.path.join(DEV_DIR, "ui", lUiFile)
+        lPyPath = os.path.join(DEV_DIR, "ui", lPyFile)
+        if not os.path.isfile(lUiPath):
+            print(f"[ui]    WARNUNG: {lUiFile} nicht gefunden, uebersprungen")
             continue
-        result = subprocess.run([uic, ui_path, "-o", py_path],
-                                capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"[ui]    FEHLER bei {ui_file}: {result.stderr.strip()}")
+        lResult = subprocess.run([lUic, lUiPath, "-o", lPyPath],
+                                 capture_output=True, text=True)
+        if lResult.returncode != 0:
+            print(f"[ui]    FEHLER bei {lUiFile}: {lResult.stderr.strip()}")
             sys.exit(1)
-        count += 1
-    print(f"[ui]    {count} UI-Datei(en) kompiliert")
+        lCount += 1
+    print(f"[ui]    {lCount} UI-Datei(en) kompiliert")
 
 
 def clean_build():
@@ -241,7 +265,7 @@ def copy_files():
 
     # Data/Settings - Default settings.ini
     with open(os.path.join(BUILD_DIR, "Data", "Settings", "settings.ini"), "w", encoding="utf-8") as f:
-        f.write("[Klassen]\nDateiname = StandardKlasse.csv\n\n[CakeData]\nDateiname = StandardCakeData.csv\n\n[IServ]\nDomain = wvss.de\n")
+        f.write("[Klassen]\nDateiname = StandardKlasse.csv\n\n[CakeData]\nDateiname = StandardCakeData.csv\n\n[IServ]\nDomain = example.org\n")
 
     # __init__.py fuer src/ und ui/
     for pkg in ["src", "ui"]:
@@ -277,119 +301,115 @@ def create_zip():
 
 def build_standalone():
     """Erstellt eine standalone Anwendung mit PyInstaller (nur fuer CI)."""
-    standalone_dir = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}")
-    standalone_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
+    lStandaloneDir = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}")
+    lStandaloneZip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
 
-    pyinstaller = shutil.which("pyinstaller")
-    if pyinstaller is None:
-        prefix = os.path.dirname(sys.executable)
-        candidate = os.path.join(prefix, "pyinstaller")
-        if os.path.isfile(candidate):
-            pyinstaller = candidate
-    if pyinstaller is None:
+    lPyInstaller = _find_executable("pyinstaller")
+    if lPyInstaller is None:
         print("[exe]   FEHLER: pyinstaller nicht gefunden!")
         print("        Installiere PyInstaller: pip install pyinstaller")
         return False
 
-    main_script = os.path.join(BUILD_DIR, MAIN_FILE)
-    icon_path = os.path.join(BUILD_DIR, "assets", "kuchen_icon.svg")
-    data_dir = os.path.join(BUILD_DIR, "Data")
+    lMainScript = os.path.join(BUILD_DIR, MAIN_FILE)
+    lIconPath = os.path.join(BUILD_DIR, "assets", "kuchen_icon.svg")
+    lDataDir = os.path.join(BUILD_DIR, "Data")
 
-    cmd = [
-        pyinstaller,
+    lCommand = [
+        lPyInstaller,
         "--onefile",
         "--windowed",
         "--name", "KuchenApp",
-        "--distpath", standalone_dir,
+        "--distpath", lStandaloneDir,
         "--workpath", os.path.join(RELEASE_DIR, "_pybuild"),
         "--specpath", os.path.join(RELEASE_DIR, "_pybuild"),
-        "--add-data", f"{data_dir}{os.pathsep}Data",
-        "--add-data", f"{icon_path}{os.pathsep}assets",
-        main_script,
+        "--add-data", f"{lDataDir}{os.pathsep}Data",
+        "--add-data", f"{lIconPath}{os.pathsep}assets",
+        lMainScript,
     ]
 
     print(f"[exe]   PyInstaller wird ausgefuehrt ...")
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"[exe]   FEHLER: {result.stderr.strip()}")
+    lResult = subprocess.run(lCommand, capture_output=True, text=True)
+    if lResult.returncode != 0:
+        print(f"[exe]   FEHLER: {lResult.stderr.strip()}")
         return False
 
     # Aufraumen: _pybuild Ordner entfernen
-    pybuild = os.path.join(RELEASE_DIR, "_pybuild")
-    if os.path.exists(pybuild):
-        shutil.rmtree(pybuild)
+    lPyBuildDir = os.path.join(RELEASE_DIR, "_pybuild")
+    if os.path.exists(lPyBuildDir):
+        shutil.rmtree(lPyBuildDir)
 
     # Data/ neben die exe kopieren (wird zur Laufzeit beschrieben)
-    standalone_data = os.path.join(standalone_dir, "Data")
-    shutil.copytree(data_dir, standalone_data)
+    lStandaloneDataDir = os.path.join(lStandaloneDir, "Data")
+    shutil.copytree(lDataDir, lStandaloneDataDir)
 
     # assets/ neben die exe kopieren (Icons etc.)
-    assets_src = os.path.join(BUILD_DIR, "assets")
-    assets_dst = os.path.join(standalone_dir, "assets")
-    if os.path.isdir(assets_src):
-        shutil.copytree(assets_src, assets_dst)
+    lAssetsSourceDir = os.path.join(BUILD_DIR, "assets")
+    lAssetsTargetDir = os.path.join(lStandaloneDir, "assets")
+    if os.path.isdir(lAssetsSourceDir):
+        shutil.copytree(lAssetsSourceDir, lAssetsTargetDir)
 
     # docs/ neben die exe kopieren (Doku-PDFs)
-    docs_src = os.path.join(BUILD_DIR, "docs")
-    docs_dst = os.path.join(standalone_dir, "docs")
-    if os.path.isdir(docs_src):
-        shutil.copytree(docs_src, docs_dst)
+    lDocsSourceDir = os.path.join(BUILD_DIR, "docs")
+    lDocsTargetDir = os.path.join(lStandaloneDir, "docs")
+    if os.path.isdir(lDocsSourceDir):
+        shutil.copytree(lDocsSourceDir, lDocsTargetDir)
 
-    print(f"[exe]   Standalone erstellt: {standalone_dir}")
+    print(f"[exe]   Standalone erstellt: {lStandaloneDir}")
 
     # ZIP fuer Standalone erstellen
-    with zipfile.ZipFile(standalone_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(standalone_dir):
-            for file in files:
-                full_path = os.path.join(root, file)
-                arcname = os.path.join(f"KuchenApp_standalone_{OS_TAG}", os.path.relpath(full_path, standalone_dir))
-                zf.write(full_path, arcname)
-    size_mb = os.path.getsize(standalone_zip) / (1024 * 1024)
-    print(f"[zip]   {standalone_zip}")
-    print(f"        Groesse: {size_mb:.1f} MB")
+    with zipfile.ZipFile(lStandaloneZip, "w", zipfile.ZIP_DEFLATED) as lZipFile:
+        for lRoot, _, lFiles in os.walk(lStandaloneDir):
+            for lFile in lFiles:
+                lFullPath = os.path.join(lRoot, lFile)
+                lArchiveName = os.path.join(f"KuchenApp_standalone_{OS_TAG}", os.path.relpath(lFullPath, lStandaloneDir))
+                lZipFile.write(lFullPath, lArchiveName)
+    lSizeMb = os.path.getsize(lStandaloneZip) / (1024 * 1024)
+    print(f"[zip]   {lStandaloneZip}")
+    print(f"        Groesse: {lSizeMb:.1f} MB")
     return True
 
 
 def _find_gh():
     """Sucht die gh CLI."""
-    gh = shutil.which("gh")
-    if gh is None:
-        candidate = os.path.join("C:\\", "Program Files", "GitHub CLI", "gh.exe")
-        if os.path.isfile(candidate):
-            gh = candidate
-    if gh is None:
+    lGh = _find_executable("gh")
+    if lGh is None:
         print("[gh]    FEHLER: gh CLI nicht gefunden!")
         print("        Installiere: https://cli.github.com/")
-    return gh
+    return lGh
+
+
+def _ensure_clean_worktree():
+    """Bricht ab, wenn uncommittete Aenderungen im Worktree liegen."""
+    lStatusResult = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if lStatusResult.returncode != 0:
+        print("[git]   FEHLER: Git-Status konnte nicht gelesen werden.")
+        return False
+    if lStatusResult.stdout.strip():
+        print("[git]   FEHLER: Der Worktree enthaelt uncommittete Aenderungen.")
+        print("        Bitte committe oder stash die Aenderungen vor dem Release.")
+        return False
+    return True
 
 
 def create_release(version):
     """Erstellt Release lokal mit gh, wartet auf CI, laedt Standalone herunter."""
-    gh = _find_gh()
-    if gh is None:
+    lGh = _find_gh()
+    if lGh is None:
+        return False
+    if not _ensure_clean_worktree():
         return False
 
     # Pruefen ob Tag schon existiert
-    result = subprocess.run(
+    lTagResult = subprocess.run(
         ["git", "tag", "-l", version],
         capture_output=True, text=True, cwd=SCRIPT_DIR
     )
-    if version in result.stdout.strip().splitlines():
+    if version in lTagResult.stdout.strip().splitlines():
         print(f"[tag]   FEHLER: Tag {version} existiert bereits!")
         return False
-
-    # Uncommitted changes committen (inkl. version.ini)
-    subprocess.run(["git", "add", "-A"], cwd=SCRIPT_DIR)
-    status = subprocess.run(
-        ["git", "status", "--porcelain"],
-        capture_output=True, text=True, cwd=SCRIPT_DIR
-    )
-    if status.stdout.strip():
-        print("[git]   Committe Aenderungen ...")
-        subprocess.run(
-            ["git", "commit", "-m", f"Release {version}"],
-            cwd=SCRIPT_DIR, check=True
-        )
 
     # Pushen
     print("[git]   Pushe commits ...")
@@ -397,14 +417,14 @@ def create_release(version):
 
     # GitHub Release erstellen (laedt Source-ZIP sofort hoch)
     print(f"[gh]    Erstelle GitHub Release {version} ...")
-    create_result = subprocess.run(
-        [gh, "release", "create", version, ZIP_PATH,
+    lCreateResult = subprocess.run(
+        [lGh, "release", "create", version, ZIP_PATH,
          "--title", f"KuchenApp {version}",
          "--notes", f"Automatisches Release {version}"],
         capture_output=True, text=True, cwd=SCRIPT_DIR
     )
-    if create_result.returncode != 0:
-        print(f"[gh]    FEHLER: {create_result.stderr.strip()}")
+    if lCreateResult.returncode != 0:
+        print(f"[gh]    FEHLER: {lCreateResult.stderr.strip()}")
         return False
     print(f"[gh]    Release {version} erstellt (Source-ZIP hochgeladen)")
 
@@ -413,11 +433,11 @@ def create_release(version):
     print("        (Das kann einige Minuten dauern)")
     time.sleep(10)
 
-    watch_result = subprocess.run(
-        [gh, "run", "watch", "--exit-status"],
+    lWatchResult = subprocess.run(
+        [lGh, "run", "watch", "--exit-status"],
         capture_output=False, text=True, cwd=SCRIPT_DIR
     )
-    if watch_result.returncode != 0:
+    if lWatchResult.returncode != 0:
         print("[ci]    FEHLER: Workflow fehlgeschlagen!")
         print("        Pruefe: gh run list")
         return False
@@ -431,8 +451,8 @@ def create_release(version):
 
 def download_release(version=None):
     """Laedt die Standalone-ZIPs vom GitHub Release herunter."""
-    gh = _find_gh()
-    if gh is None:
+    lGh = _find_gh()
+    if lGh is None:
         return False
 
     os.makedirs(RELEASE_DIR, exist_ok=True)
@@ -440,27 +460,27 @@ def download_release(version=None):
     # Version bestimmen
     if version is None:
         try:
-            result = subprocess.run(
-                [gh, "release", "view", "--json", "tagName"],
+            lViewResult = subprocess.run(
+                [lGh, "release", "view", "--json", "tagName"],
                 capture_output=True, text=True, cwd=SCRIPT_DIR
             )
-            if result.returncode != 0:
-                print(f"[dl]    FEHLER: {result.stderr.strip()}")
+            if lViewResult.returncode != 0:
+                print(f"[dl]    FEHLER: {lViewResult.stderr.strip()}")
                 return False
-            version = json.loads(result.stdout).get("tagName", "")
+            version = json.loads(lViewResult.stdout).get("tagName", "")
         except (json.JSONDecodeError, KeyError) as e:
             print(f"[dl]    FEHLER: {e}")
             return False
 
     print(f"[dl]    Lade von Release {version} herunter ...")
-    dl_result = subprocess.run(
-        [gh, "release", "download", version,
+    lDownloadResult = subprocess.run(
+        [lGh, "release", "download", version,
          "--pattern", "KuchenApp_standalone_*.zip",
          "--dir", RELEASE_DIR, "--clobber"],
         capture_output=True, text=True, cwd=SCRIPT_DIR
     )
-    if dl_result.returncode != 0:
-        print(f"[dl]    FEHLER: {dl_result.stderr.strip()}")
+    if lDownloadResult.returncode != 0:
+        print(f"[dl]    FEHLER: {lDownloadResult.stderr.strip()}")
         return False
 
     # Heruntergeladene Dateien auflisten
@@ -488,8 +508,13 @@ def _build_source():
 
 
 def main():
-    ci_standalone = "--standalone" in sys.argv
-    ci_source = "--source" in sys.argv
+    lArgumentParser = argparse.ArgumentParser(description="Build-Skript fuer KuchenApp Releases.")
+    lArgumentParser.add_argument("--source", action="store_true", help="Nur das Source-Bundle bauen.")
+    lArgumentParser.add_argument("--standalone", action="store_true", help="Nur die Standalone-Version fuer das aktuelle OS bauen.")
+    lArgs = lArgumentParser.parse_args()
+
+    lCiStandalone = lArgs.standalone
+    lCiSource = lArgs.source
 
     # Aktuelle Version anzeigen
     major, minor, patch = read_version()
@@ -497,9 +522,9 @@ def main():
 
     print("=" * 40)
     print("  KuchenApp Release Build")
-    if ci_standalone:
+    if lCiStandalone:
         print(f"  Modus: Standalone ({OS_TAG})")
-    elif ci_source:
+    elif lCiSource:
         print("  Modus: Source-Bundle (CI)")
     else:
         print(f"  Modus: Release")
@@ -507,7 +532,7 @@ def main():
     print("=" * 40)
     print()
 
-    if ci_standalone:
+    if lCiStandalone:
         clean_build()
         compile_ui()
         create_dirs()
@@ -515,13 +540,13 @@ def main():
         if build_standalone():
             print()
             print(f"--- Standalone {OS_TAG.capitalize()} ---")
-            standalone_zip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
-            print(f"  ZIP:  {standalone_zip}")
+            lStandaloneZip = os.path.join(RELEASE_DIR, f"KuchenApp_standalone_{OS_TAG}.zip")
+            print(f"  ZIP:  {lStandaloneZip}")
         else:
             print("[exe]   Standalone-Build fehlgeschlagen.")
             sys.exit(1)
 
-    elif ci_source:
+    elif lCiSource:
         _build_source()
 
     else:
