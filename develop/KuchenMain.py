@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QVBoxLayout, QLabel, QGroupBox, QSizePolicy, QHeaderView
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QVBoxLayout, QGroupBox, QSizePolicy, QHeaderView
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
@@ -71,10 +71,10 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             self.mHeaders = self.mDM.mMainHeaders[:]
             self._createRadioButtons()
             self.SortColumn()
-            self.labInfo.setText("File imported successfully")
+            self.mLogger.info("Load", "Standard file loaded successfully.")
         else:
             self.mHeaders = []
-            self.labInfo.setText("No file selected")
+            self.mLogger.warning("Load", "No standard file could be loaded.")
         
         # Mail-Liste beim Start laden
         self.mDM.LoadStandardFile(aForMainTable=False)
@@ -127,11 +127,11 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                     self.mHeaders = self.mDM.mMainHeaders[:]
                     self._createRadioButtons()
                     self.FillTable()
-                    self.labInfo.setText("File imported successfully")
+                    self.mLogger.info("Import", "File imported successfully.")
                 else:
-                    self.labInfo.setText("Import failed")
+                    self.mLogger.error("Import", "Import failed.")
         else:
-            self.labInfo.setText("No file selected")
+            self.mLogger.info("Import", "No file selected.")
 
 
 
@@ -153,7 +153,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lData = self.mDM.getData()
         lData.append([""] * len(self.mHeaders))
         self.mDM.setData(lData)
-        self.mDM.setSortedData([row[:] for row in lData])
+        self.mDM.setSortedData(list(lData))
         self.FillTable()
     
     
@@ -172,13 +172,12 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             self.mDM.setData(lData)
             self.mDM.setSortedData(lSData)
             self.FillTable()
-            self.labInfo.setText("Successfully removed selected row(s)")
+            self.mLogger.info("Delete", "Successfully removed selected row(s).")
         else:
-            self.labInfo.setText("No rows selected")
+            self.mLogger.warning("Delete", "No rows selected.")
 
     
     def clearLabels(self, aSearch=False):
-        self.labInfo.setText("")
         if not aSearch:
             self.leSearch.setText("")
 
@@ -221,15 +220,9 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         lCol = aItem.column()
         lValue = aItem.data(Qt.DisplayRole)  # type: ignore
         lSData = self.mDM.getSortedData()
-        lOldValue = lSData[lRow][lCol]
-        lSData[lRow][lCol] = lValue
-        self.mDM.setSortedData(lSData)
-        lData = self.mDM.getData()
-        for lDataRow in lData:
-            if lDataRow[lCol] == lOldValue and all(lDataRow[i] == lSData[lRow][i] for i in range(len(lDataRow)) if i != lCol):
-                lDataRow[lCol] = lValue
-                break
-        self.mDM.setData(lData)
+        if 0 <= lRow < len(lSData) and 0 <= lCol < len(lSData[lRow]):
+            lSData[lRow][lCol] = lValue
+            self.mDM.setSortedData(lSData)
 
 
     def Search(self, aText):
@@ -238,13 +231,13 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                 lFiltered = [lRow for lRow in self.mDM.getData() if aText.lower() in str(lRow[self.mDM.getSortedColumnIndex()]).lower()]
                 self.mDM.setSortedData(lFiltered)
             else:
-                self.mDM.setSortedData([row[:] for row in self.mDM.getData()])
+                self.mDM.setSortedData(list(self.mDM.getData()))
             self.mDM.sortData(self.mDM.getSortedColumnIndex(), aReverse=self._isDescending())
         else:
             if aText.strip():  
                self.mDM.setSortedData([lRow for lRow in self.mDM.getData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
             else:
-                self.mDM.setSortedData([row[:] for row in self.mDM.getData()])
+                self.mDM.setSortedData(list(self.mDM.getData()))
     
         self.FillTable(True)
 

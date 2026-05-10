@@ -18,14 +18,22 @@ UI_DIR = os.path.join(SCRIPT_DIR, "develop", "ui")
 
 def _find_uic():
     """Locate pyside6-uic executable."""
-    uic = shutil.which("pyside6-uic")
-    if uic:
-        return [uic]
-    # Fallback: look next to the Python executable (Scripts folder)
-    scripts_dir = os.path.join(os.path.dirname(sys.executable), "Scripts")
-    candidate = os.path.join(scripts_dir, "pyside6-uic.exe" if sys.platform == "win32" else "pyside6-uic")
-    if os.path.isfile(candidate):
-        return [candidate]
+    lUic = shutil.which("pyside6-uic")
+    if lUic:
+        return [lUic]
+
+    lPythonDir = os.path.dirname(sys.executable)
+    lExecutableName = "pyside6-uic.exe" if sys.platform == "win32" else "pyside6-uic"
+    lCandidateDirs = [
+        lPythonDir,
+        os.path.join(lPythonDir, "Scripts"),
+        os.path.join(lPythonDir, "bin"),
+    ]
+    for lCandidateDir in lCandidateDirs:
+        lCandidatePath = os.path.join(lCandidateDir, lExecutableName)
+        if os.path.isfile(lCandidatePath):
+            return [lCandidatePath]
+
     print("ERROR: pyside6-uic not found. Install PySide6: pip install PySide6")
     sys.exit(1)
 

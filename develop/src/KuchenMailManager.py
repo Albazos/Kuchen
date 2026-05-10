@@ -34,10 +34,10 @@ class CKuchenDialog(QDialog, Ui_Dialog):
             self.mHeaders = self.mDM.mMailHeaders[:]
             self._createRadioButtons()
             self.SortColumn()
-            self.labInfo.setText("File imported successfully")
+            self.mLogger.info("Load", "Standard mail list loaded successfully.")
         else:
             self.mHeaders = []
-            self.labInfo.setText("No file selected")
+            self.mLogger.warning("Load", "No standard mail list could be loaded.")
     
     def SaveFile(self):
         if self.mDM.SaveFile(aForMainTable=False):
@@ -55,13 +55,15 @@ class CKuchenDialog(QDialog, Ui_Dialog):
             lSelectedFile = lFileDialog.selectedFiles()
             if lSelectedFile:
                 lFilePath = lSelectedFile[0]
-                self.mDM.ImportFile(lFilePath, aForMainTable=False)
-                self.mHeaders = self.mDM.mMailHeaders[:]
-                self._createRadioButtons()
-                self.FillTable()
-                self.labInfo.setText("File imported successfully")
+                if self.mDM.ImportFile(lFilePath, aForMainTable=False):
+                    self.mHeaders = self.mDM.mMailHeaders[:]
+                    self._createRadioButtons()
+                    self.FillTable()
+                    self.mLogger.info("Import", "Mail list imported successfully.")
+                else:
+                    self.mLogger.error("Import", "Mail list import failed.")
         else:
-            self.labInfo.setText("No file selected")
+            self.mLogger.info("Import", "No file selected.")
 
 
 
@@ -83,7 +85,7 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lData = self.mDM.getMailData()
         lData.append([""] * len(self.mHeaders))
         self.mDM.setMailData(lData)
-        self.mDM.setSortedMailData([row[:] for row in lData])
+        self.mDM.setSortedMailData(list(lData))
         self.FillTable()
     
     
@@ -102,13 +104,12 @@ class CKuchenDialog(QDialog, Ui_Dialog):
             self.mDM.setMailData(lData)
             self.mDM.setSortedMailData(lSData)
             self.FillTable()
-            self.labInfo.setText("Successfully removed selected row(s)")
+            self.mLogger.info("Delete", "Successfully removed selected row(s).")
         else:
-            self.labInfo.setText("No rows selected")
+            self.mLogger.warning("Delete", "No rows selected.")
 
     
     def clearLabels(self, aSearch=False):
-        self.labInfo.setText("")
         if not aSearch:
             self.leSearch.setText("")
 
@@ -141,15 +142,9 @@ class CKuchenDialog(QDialog, Ui_Dialog):
         lCol = aItem.column()
         lValue = aItem.data(Qt.DisplayRole)  # type: ignore
         lSData = self.mDM.getSortedMailData()
-        lOldValue = lSData[lRow][lCol]
-        lSData[lRow][lCol] = lValue
-        self.mDM.setSortedMailData(lSData)
-        lData = self.mDM.getMailData()
-        for lDataRow in lData:
-            if lDataRow[lCol] == lOldValue and all(lDataRow[i] == lSData[lRow][i] for i in range(len(lDataRow)) if i != lCol):
-                lDataRow[lCol] = lValue
-                break
-        self.mDM.setMailData(lData)
+        if 0 <= lRow < len(lSData) and 0 <= lCol < len(lSData[lRow]):
+            lSData[lRow][lCol] = lValue
+            self.mDM.setSortedMailData(lSData)
 
 
     def Search(self, aText):
@@ -158,13 +153,13 @@ class CKuchenDialog(QDialog, Ui_Dialog):
                 lFiltered = [lRow for lRow in self.mDM.getMailData() if aText.lower() in str(lRow[self.mDM.getSortedMailColumnIndex()]).lower()]
                 self.mDM.setSortedMailData(lFiltered)
             else:
-                self.mDM.setSortedMailData([row[:] for row in self.mDM.getMailData()])
+                self.mDM.setSortedMailData(list(self.mDM.getMailData()))
             self.mDM.sortData(self.mDM.getSortedColumnIndex(aForMain=False), aReverse=self._isDescending(), aForMain=False)
         else:
             if aText.strip():  
                self.mDM.setSortedMailData([lRow for lRow in self.mDM.getMailData() if any(aText.lower() in str(lCell).lower() for lCell in lRow)])
             else:
-                self.mDM.setSortedMailData([row[:] for row in self.mDM.getMailData()])
+                self.mDM.setSortedMailData(list(self.mDM.getMailData()))
     
         self.FillTable(True)
 

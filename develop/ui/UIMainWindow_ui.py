@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'UIMainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.11.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -92,11 +92,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.pbnQuit, 4, 1, 1, 1)
 
-        self.labInfo = QLabel(self.centralwidget)
-        self.labInfo.setObjectName(u"labInfo")
-
-        self.gridLayout.addWidget(self.labInfo, 4, 0, 1, 1)
-
         self.pbnAdd = QPushButton(self.centralwidget)
         self.pbnAdd.setObjectName(u"pbnAdd")
         self.pbnAdd.setEnabled(True)
@@ -152,7 +147,6 @@ class Ui_MainWindow(object):
         self.pbnSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.pbnImport.setText(QCoreApplication.translate("MainWindow", u"Import", None))
         self.pbnQuit.setText(QCoreApplication.translate("MainWindow", u"Quit", None))
-        self.labInfo.setText(QCoreApplication.translate("MainWindow", u"InfoText", None))
         self.pbnAdd.setText(QCoreApplication.translate("MainWindow", u"Add New", None))
         self.pbnDelete.setText(QCoreApplication.translate("MainWindow", u"Delete", None))
         self.pbnSendMail.setText(QCoreApplication.translate("MainWindow", u"SendMails", None))

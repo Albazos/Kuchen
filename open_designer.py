@@ -12,13 +12,22 @@ UI_DIR = os.path.join(SCRIPT_DIR, "develop", "ui")
 
 
 def find_designer():
-    exe = shutil.which("pyside6-designer")
-    if exe:
-        return exe
-    scripts_dir = os.path.join(os.path.dirname(sys.executable), "Scripts")
-    candidate = os.path.join(scripts_dir, "pyside6-designer.exe" if sys.platform == "win32" else "pyside6-designer")
-    if os.path.isfile(candidate):
-        return candidate
+    lDesigner = shutil.which("pyside6-designer")
+    if lDesigner:
+        return lDesigner
+
+    lPythonDir = os.path.dirname(sys.executable)
+    lExecutableName = "pyside6-designer.exe" if sys.platform == "win32" else "pyside6-designer"
+    lCandidateDirs = [
+        lPythonDir,
+        os.path.join(lPythonDir, "Scripts"),
+        os.path.join(lPythonDir, "bin"),
+    ]
+    for lCandidateDir in lCandidateDirs:
+        lCandidatePath = os.path.join(lCandidateDir, lExecutableName)
+        if os.path.isfile(lCandidatePath):
+            return lCandidatePath
+
     print("ERROR: pyside6-designer not found. Install PySide6: pip install PySide6")
     sys.exit(1)
 
