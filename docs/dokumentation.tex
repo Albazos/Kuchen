@@ -270,12 +270,18 @@ Kuchen/
 
 \begin{description}[style=nextline, leftmargin=1.5em]
     \item[\texttt{develop/}] Enthaelt den vollstaendigen Quellcode, .ui-Designdateien
-        und Testdaten. Hier wird aktiv entwickelt.
+        und Standard-/Demo-Daten. Hier wird aktiv entwickelt.
     \item[\texttt{release/}] Wird durch \texttt{build\_release.py} automatisch generiert
         und via \texttt{.gitignore} nicht versioniert. Enthaelt nur die fuer den
         Endbenutzer noetigen Dateien. Die CSV-Dateien werden mit leeren
         Standard-Headern ausgeliefert.
 \end{description}
+
+\begin{warnbox}[Hinweis zu Standard- und lokalen Daten]
+Im Repository sollten nur neutrale Template-Dateien versioniert werden. Reale
+Nutzdaten aus dem schulischen Alltag koennen lokal weiterverwendet werden,
+sollten aber fuer ein oeffentliches Repository nicht eingecheckt werden.
+\end{warnbox}
 
 
 % =====================================================================
@@ -397,9 +403,9 @@ der Anwendung.
         Spalte gesucht. Ansonsten: Volltextsuche ueber alle Spalten.
         Nach dem Filtern wird die Sortierung erneut angewandt.
     \item[\texttt{CellEdited(aItem)}]
-        Synchronisiert Aenderungen in der Tabelle zurueck in \texttt{mSortedData}
-        \emph{und} \texttt{mData}. Sucht die Original-Zeile anhand aller
-        anderen Spaltenwerte (da die Reihenfolge abweichen kann).
+        Aktualisiert den bearbeiteten Tabellenwert in \texttt{mSortedData}.
+        Da die gefilterten und sortierten Ansichten auf dieselben Zeilenobjekte
+        wie die Originaldaten verweisen, bleibt \texttt{mData} dabei konsistent.
     \item[\texttt{FillTable()}]
         Loescht das \texttt{QStandardItemModel}, setzt Header und fuellt die
         Tabelle aus \texttt{mSortedData}. Wird nach jeder Datenaenderung
@@ -451,15 +457,16 @@ angezeigt wird. Dies ermoeglicht das Zuruecksetzen von Sortierung und Suche.
     \item[\texttt{LoadStandardFile(aForMainTable)}]
         Laedt die CSV-Datei, deren Name in den Settings steht. Verwendet
         \texttt{csv.Sniffer} zur automatischen Dialekt-Erkennung (Trennzeichen,
-        Quoting). Extrahiert die erste Zeile als Header.
+        Quoting). Extrahiert die erste Zeile als Header und merkt sich das
+        erkannte Trennzeichen fuer spaeteres Speichern.
     \item[\texttt{ImportFile(aPath)}]
-        Importiert eine externe CSV. Speichert den Dateinamen in
-        \texttt{mImportedFilename}. Beim naechsten \texttt{SaveFile()} wird
-        dieser Name in die Settings uebernommen.
+        Importiert eine externe CSV. Speichert den Dateinamen getrennt fuer
+        Haupt- und Maildaten, damit beim naechsten \texttt{SaveFile()} der
+        passende Name in die Settings uebernommen wird.
     \item[\texttt{SaveFile(aForMainTable)}]
         Speichert die Daten als CSV. Wurde zuvor eine Datei importiert,
         aktualisiert \texttt{SaveFile} automatisch die Settings mit dem
-        neuen Dateinamen.
+        neuen Dateinamen und behaelt das urspruenglich erkannte Trennzeichen bei.
     \item[\texttt{sortData(aSortColumnIndex, aReverse, aForMain)}]
         Sortiert \texttt{mSortedData} nach der gegebenen Spalte.
         Der Parameter \texttt{aReverse} steuert die Richtung.
@@ -615,21 +622,22 @@ ausschliesslich ueber GitHub Actions.
 
 \begin{codebox}[Verwendung]
 \begin{lstlisting}[language=bash, numbers=none]
-python build_release.py              # Source + Standalone-ZIPs herunterladen
-python build_release.py --no-download  # Nur Source, kein Download
+python build_release.py           # Release-Ablauf mit Versionssprung
+python build_release.py --source  # Nur Source-Bundle bauen
+python build_release.py --standalone  # Standalone fuer aktuelles OS bauen
 \end{lstlisting}
 \end{codebox}
 
-\textbf{Ablauf bei Aufruf ohne Flags:}
+\textbf{Ablauf bei normalem Aufruf ohne Flags:}
 \begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Version:} Patch-Version in \texttt{version.ini} wird erhoeht
     \item \textbf{Clean:} Alter \texttt{release/}-Ordner wird geloescht
     \item \textbf{UI-Kompilierung:} \texttt{.ui} $\rightarrow$ \texttt{\_ui.py}
         via \texttt{pyside6-uic}
     \item \textbf{Kopieren:} Quelldateien in die Release-Struktur
     \item \textbf{README:} Automatische README.txt-Generierung
     \item \textbf{ZIP:} Source-Bundle als \texttt{KuchenApp.zip}
-    \item \textbf{Download:} Standalone-ZIPs vom neuesten GitHub Release
-        herunterladen (via \texttt{gh} CLI)
+    \item \textbf{Release:} Git- und GitHub-Release-Ablauf mit Upload der Artefakte
 \end{enumerate}
 
 \begin{warnbox}[Voraussetzung fuer Download]
@@ -697,13 +705,13 @@ fuer beide Betriebssysteme.
 
 \begin{codebox}[Release ausloesen]
 \begin{lstlisting}[language=bash, numbers=none]
-git tag v1.0.0
-git push --tags
-# -> CI baut automatisch alle 3 ZIPs
-# -> GitHub Release wird erstellt
-
-# Danach lokal herunterladen:
 python build_release.py
+\end{lstlisting}
+\end{codebox}
+
+\begin{codebox}[Nur Source-Bundle in der CI oder lokal]
+\begin{lstlisting}[language=bash, numbers=none]
+python build_release.py --source
 \end{lstlisting}
 \end{codebox}
 
@@ -740,9 +748,8 @@ SMTP\_SSL & Verbindung zu IServ ueber SSL-verschluesseltes SMTP (Port 465) \\
 
 \begin{codebox}[Schnellstart]
 \begin{lstlisting}[language=bash, numbers=none]
-pip install PySide6
-cd KuchenApp
-python KuchenMain.py
+pip install -r requirements.txt
+python develop/KuchenMain.py
 \end{lstlisting}
 \end{codebox}
 

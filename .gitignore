@@ -29,3 +29,10 @@ docs/*.fdb_latexmk
 # OS
 .DS_Store
 Thumbs.db
+
+# Local app data
+develop/Data/CakeData.csv
+develop/Data/Klassen/*.csv
+!develop/Data/Klassen/StandardKlasse.csv
+develop/Data/Settings/settings.ini
+!develop/Data/Settings/settings.example.ini

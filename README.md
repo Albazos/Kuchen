@@ -48,13 +48,52 @@ pip install -r requirements.txt
 python develop/KuchenMain.py
 ```
 
-## Demo- und Standarddaten
+## Daten und Templates
 
-Die im Repository enthaltenen CSV-Dateien wurden von mir auch im Schulalltag verwendet und dienen hier gleichzeitig als Standard- bzw. Demo-Daten.
+Im Repository bleiben nur neutrale Template- und Standarddateien versioniert.
+Persoenliche oder im Schulalltag verwendete Daten sollen lokal liegen und werden
+nicht mit Git geteilt.
 
-Wichtig:
-- Vor einer Weitergabe ausserhalb des vorgesehenen Schulkontexts sollte geprueft werden, ob enthaltene Daten weiterhin veroeffentlicht werden duerfen.
-- Fuer eine spaetere breitere Nutzung empfiehlt es sich, zusaetzlich anonymisierte Beispieldaten bereitzustellen.
+Versioniert bleiben:
+
+- `develop/Data/StandardCakeData.csv`
+- `develop/Data/Klassen/StandardKlasse.csv`
+- `develop/Data/Settings/settings.example.ini`
+
+Lokal und nicht versioniert:
+
+- `develop/Data/CakeData.csv`
+- individuelle Klassendateien in `develop/Data/Klassen/`
+- `develop/Data/Settings/settings.ini`
+
+## Eigene Daten einrichten
+
+Fuer den ersten Einsatz reichen die Templates aus. Optional kannst du eigene
+Dateien anlegen oder spaeter ueber die Import-Funktion laden.
+
+### Klassendatei
+
+Beispiel fuer `develop/Data/Klassen/StandardKlasse.csv`:
+
+```text
+Name,Mail
+Max Mustermann,max.mustermann@example.org
+```
+
+### Kuchendatei
+
+Beispiel fuer `develop/Data/StandardCakeData.csv`:
+
+```text
+Name,CakeCount,Hanuta,Waffel,Date
+```
+
+### Einstellungen
+
+Wenn keine lokale `settings.ini` vorhanden ist, verwendet die Anwendung
+automatisch die eingebauten Standardwerte. Optional kannst du
+`develop/Data/Settings/settings.example.ini` als Vorlage fuer eine eigene
+`settings.ini` verwenden.
 
 ## Plattformen
 

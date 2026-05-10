@@ -218,13 +218,19 @@ Nach dem Start zeigt die KuchenApp das Hauptfenster mit folgenden Bereichen:
 \textbf{Suche} & Filtert die Tabelle nach dem eingegebenen Begriff. \\
 \textbf{Sort} & Auswahl der Spalte, nach der sortiert wird (auf-/absteigend). \\
 \textbf{Buttons} & Aktionen wie Importieren, Speichern, Hinzufuegen, Loeschen, Mailliste, Senden. \\
-\textbf{Statuszeile} & Zeigt Erfolgs- bzw. Fehlermeldungen an. \\
+\textbf{Hinweisdialoge} & Zeigen Erfolgs-, Warn- und Fehlermeldungen als Dialogfenster an. \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
 % =====================================================================
 \section{Arbeiten mit der Kuchen-Liste}
+
+\begin{warnbox}[Hinweis zu den mitgelieferten Daten]
+Im Repository sollen nur neutrale Template- und Standarddateien versioniert
+werden. Persoenliche oder im Schulalltag verwendete Daten sollten lokal liegen
+und nicht mit Git veroeffentlicht werden.
+\end{warnbox}
 
 \subsection{CSV-Datei importieren}
 
@@ -314,8 +320,8 @@ Jede Zeile enthaelt einen Namen und eine gueltige IServ-E-Mail-Adresse, z.\,B.
 \end{stepbox}
 
 \begin{successbox}[Erfolgreicher Versand]
-Bei erfolgreichem Versand erscheint die Statusmeldung
-\emph{"`Mails sent successfully."'} in der unteren Statuszeile.
+Bei erfolgreichem Versand erscheint ein Informationsdialog mit der Meldung
+\emph{"`Mails sent successfully."'}.
 \end{successbox}
 
 \subsection{Was wird verschickt?}
@@ -340,8 +346,8 @@ entpackten Ordner heraus startest. Unter Linux muss die Datei ausfuehrbar sein
 
 \subsection{Beim Import passiert nichts}
 Stelle sicher, dass die Datei tatsaechlich im CSV-Format vorliegt und eine
-Kopfzeile besitzt. Die Statuszeile zeigt im Fehlerfall \emph{"`Import failed"'}
-oder \emph{"`No file selected"'} an.
+Kopfzeile besitzt. Im Fehlerfall erscheint ein Dialog mit einer Meldung wie
+\emph{"`Import failed."'} oder \emph{"`No file selected."'}.
 
 \subsection{Die Mails werden nicht verschickt}
 Pruefe folgende Punkte:
