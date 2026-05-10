@@ -394,12 +394,35 @@ def _ensure_clean_worktree():
     return True
 
 
+def _commit_release_version(aVersion):
+    """Committed nur die erwartete Versionsaenderung in version.ini."""
+    lStatusResult = subprocess.run(
+        ["git", "status", "--porcelain", "--", "version.ini"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if lStatusResult.returncode != 0:
+        print("[git]   FEHLER: Git-Status fuer version.ini konnte nicht gelesen werden.")
+        return False
+
+    if not lStatusResult.stdout.strip():
+        print("[git]   WARNUNG: version.ini wurde nicht geaendert, kein Release-Commit erstellt.")
+        return True
+
+    subprocess.run(["git", "add", "version.ini"], cwd=SCRIPT_DIR, check=True)
+    print("[git]   Committe version.ini fuer das Release ...")
+    subprocess.run(
+        ["git", "commit", "-m", f"Release {aVersion}"],
+        cwd=SCRIPT_DIR, check=True
+    )
+    return True
+
+
 def create_release(version):
     """Erstellt Release lokal mit gh, wartet auf CI, laedt Standalone herunter."""
     lGh = _find_gh()
     if lGh is None:
         return False
-    if not _ensure_clean_worktree():
+    if not _commit_release_version(version):
         return False
 
     # Pruefen ob Tag schon existiert
@@ -551,6 +574,8 @@ def main():
 
     else:
         # Normaler Aufruf: Patch hochzaehlen, Source bauen, Release erstellen
+        if not _ensure_clean_worktree():
+            sys.exit(1)
         release_version = bump_patch()
         _build_source()
         print()
