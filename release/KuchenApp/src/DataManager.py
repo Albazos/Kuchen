@@ -26,7 +26,10 @@ class DataManager():
         self.mSortedColumnIndex = None
         self.mMainHeaders = []
         self.mMailHeaders = []
-        self.mImportedFilename = None
+        self.mImportedFilenameMain = None
+        self.mImportedFilenameMail = None
+        self.mMainDelimiter = ","
+        self.mMailDelimiter = ","
         self._base_dir = _get_base_dir()
         self.mSettings = SM.SettingsManager()
         self.mLogger = AL.AppLogger()
@@ -88,25 +91,17 @@ class DataManager():
             lKlassenDatei = self.mSettings.getKlassenDateiname()
             lFilePath = os.path.join(self._base_dir, "Data", "Klassen", lKlassenDatei)
         try:
-            with open(lFilePath, newline='') as csvfile:
-                lSample = csvfile.read(4096)
-                csvfile.seek(0)
-                lDialect = csv.Sniffer().sniff(lSample)
-                lReader = csv.reader(csvfile, dialect=lDialect)
-                if aForMainTable:
-                    self.setData(list(lReader))              
-                    self.mMainHeaders = self.getData()[0]
-                    del self.getData()[0]
-                    self._padRows(self.getData(), len(self.mMainHeaders))
-                else:
-                    self.setMailData(list(lReader))              
-                    self.mMailHeaders = self.getMailData()[0]
-                    del self.getMailData()[0]
-                    self._padRows(self.getMailData(), len(self.mMailHeaders))
-            if aForMainTable:            
-                self.setSortedData([row[:] for row in self.getData()])
+            lHeaders, lRows, lDelimiter = self._loadCsvData(lFilePath)
+            if aForMainTable:
+                self.mMainHeaders = lHeaders
+                self.setData(lRows)
+                self.setSortedData(list(self.getData()))
+                self.mMainDelimiter = lDelimiter
             else:
-                self.setSortedMailData([row[:] for row in self.getMailData()])
+                self.mMailHeaders = lHeaders
+                self.setMailData(lRows)
+                self.setSortedMailData(list(self.getMailData()))
+                self.mMailDelimiter = lDelimiter
             return True  
         except (OSError, csv.Error) as e:
             self.mLogger.error("Load File", f"Error loading file: {e}")
@@ -130,19 +125,25 @@ class DataManager():
             self.setSortedMailData(lSData)
     
     def SaveFile(self, aForMainTable = True):
-        if aForMainTable and self.mImportedFilename:
-            self.mSettings.setCakeDataDateiname(self.mImportedFilename)
+        if aForMainTable and self.mImportedFilenameMain:
+            self.mSettings.setCakeDataDateiname(self.mImportedFilenameMain)
             self.mSettings.save()
-            self.mImportedFilename = None
+            self.mImportedFilenameMain = None
+        elif not aForMainTable and self.mImportedFilenameMail:
+            self.mSettings.setKlassenDateiname(self.mImportedFilenameMail)
+            self.mSettings.save()
+            self.mImportedFilenameMail = None
         if aForMainTable:
             lCakeDatei = self.mSettings.getCakeDataDateiname()
             lFilePath = os.path.join(self._base_dir, "Data", lCakeDatei)
+            lDelimiter = self.mMainDelimiter
         else: 
             lKlassenDatei = self.mSettings.getKlassenDateiname()
             lFilePath = os.path.join(self._base_dir, "Data", "Klassen", lKlassenDatei)
+            lDelimiter = self.mMailDelimiter
         try:
             with open(lFilePath, 'w', newline='') as csvfile:
-                lWriter = csv.writer(csvfile, delimiter=',')
+                lWriter = csv.writer(csvfile, delimiter=lDelimiter)
                 if aForMainTable:
                     lWriter.writerow(self.mMainHeaders)
                     lWriter.writerows(self.getData())
@@ -156,28 +157,37 @@ class DataManager():
         
     def ImportFile(self, aPath, aForMainTable = True):
         try:
-            with open(aPath, newline='') as csvfile:
-                lSample = csvfile.read(4096)
-                csvfile.seek(0)
-                lDialect = csv.Sniffer().sniff(lSample)
-                lReader = csv.reader(csvfile, dialect=lDialect)
-                if aForMainTable:
-                    self.setData(list(lReader))          
-                    self.mMainHeaders = self.getData()[0]
-                    del self.getData()[0]
-                    self._padRows(self.getData(), len(self.mMainHeaders))
-                    self.setSortedData([row[:] for row in self.getData()])
-                    self.mImportedFilename = os.path.basename(aPath)
-                else:
-                    self.setMailData(list(lReader))          
-                    self.mMailHeaders = self.getMailData()[0]
-                    del self.getMailData()[0]
-                    self._padRows(self.getMailData(), len(self.mMailHeaders))
-                    self.setSortedMailData([row[:] for row in self.getMailData()])
+            lHeaders, lRows, lDelimiter = self._loadCsvData(aPath)
+            if aForMainTable:
+                self.setData(lRows)
+                self.mMainHeaders = lHeaders
+                self.setSortedData(list(self.getData()))
+                self.mImportedFilenameMain = os.path.basename(aPath)
+                self.mMainDelimiter = lDelimiter
+            else:
+                self.setMailData(lRows)
+                self.mMailHeaders = lHeaders
+                self.setSortedMailData(list(self.getMailData()))
+                self.mImportedFilenameMail = os.path.basename(aPath)
+                self.mMailDelimiter = lDelimiter
             return True
         except (OSError, csv.Error) as e:
             self.mLogger.error("Import File", f"Error importing file: {e}")
             return False
+
+    def _loadCsvData(self, aPath):
+        with open(aPath, newline='', encoding="utf-8-sig") as lCsvFile:
+            lSample = lCsvFile.read(4096)
+            lCsvFile.seek(0)
+            lDialect = csv.Sniffer().sniff(lSample)
+            lReader = csv.reader(lCsvFile, dialect=lDialect)
+            lRows = list(lReader)
+        if not lRows:
+            raise csv.Error("CSV file is empty")
+        lHeaders = lRows[0]
+        lDataRows = lRows[1:]
+        self._padRows(lDataRows, len(lHeaders))
+        return lHeaders, lDataRows, lDialect.delimiter
     
     
     def createCompleteMailData(self):
