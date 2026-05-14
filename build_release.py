@@ -35,7 +35,12 @@ RELEASE_DIR = os.path.join(SCRIPT_DIR, "release")
 BUILD_DIR = os.path.join(RELEASE_DIR, "KuchenApp")
 ZIP_PATH = os.path.join(RELEASE_DIR, "KuchenApp.zip")
 
-# Doku-PDFs die nach docs/ kopiert werden
+# Doku-PDFs werden aus den LaTeX-Quellen neu gebaut und ins Release kopiert.
+DOC_SOURCE_FILES = [
+    "dokumentation.tex",
+    "benutzerdokumentation.tex",
+]
+
 DOC_FILES = [
     "dokumentation.pdf",
     "benutzerdokumentation.pdf",
@@ -211,6 +216,37 @@ def compile_ui():
             sys.exit(1)
         lCount += 1
     print(f"[ui]    {lCount} UI-Datei(en) kompiliert")
+
+
+def compile_docs():
+    """Kompiliert LaTeX-Dokumentation nach PDF, wenn pdflatex vorhanden ist."""
+    lPdfLatex = _find_executable("pdflatex")
+    if lPdfLatex is None:
+        print("[docs]  WARNUNG: pdflatex nicht gefunden, Doku-PDFs werden nicht neu gebaut.")
+        return False
+
+    lBuiltCount = 0
+    for lTexFile in DOC_SOURCE_FILES:
+        lTexPath = os.path.join(DOCS_DIR, lTexFile)
+        if not os.path.isfile(lTexPath):
+            print(f"[docs]  WARNUNG: {lTexFile} nicht gefunden, uebersprungen")
+            continue
+
+        for _ in range(2):
+            lResult = subprocess.run(
+                [lPdfLatex, "-interaction=nonstopmode", "-halt-on-error", lTexFile],
+                cwd=DOCS_DIR, capture_output=True, text=True
+            )
+            if lResult.returncode != 0:
+                print(f"[docs]  WARNUNG: {lTexFile} konnte nicht kompiliert werden.")
+                print(f"        {lResult.stderr.strip() or lResult.stdout.strip()}")
+                break
+        else:
+            lBuiltCount += 1
+
+    if lBuiltCount:
+        print(f"[docs]  {lBuiltCount} Doku-PDF(s) neu gebaut")
+    return lBuiltCount == len(DOC_SOURCE_FILES)
 
 
 def clean_build():
@@ -396,6 +432,27 @@ def _ensure_clean_worktree():
 
 def _commit_release_version(aVersion):
     """Committed nur die erwartete Versionsaenderung in version.ini."""
+    lFullStatusResult = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if lFullStatusResult.returncode != 0:
+        print("[git]   FEHLER: Git-Status konnte nicht gelesen werden.")
+        return False
+
+    lUnexpectedChanges = []
+    for lStatusLine in lFullStatusResult.stdout.splitlines():
+        lChangedPath = lStatusLine[3:]
+        if lChangedPath != "version.ini":
+            lUnexpectedChanges.append(lStatusLine)
+
+    if lUnexpectedChanges:
+        print("[git]   FEHLER: Nach dem Build gibt es unerwartete Aenderungen:")
+        for lStatusLine in lUnexpectedChanges:
+            print(f"        {lStatusLine}")
+        print("        Bitte diese Aenderungen vor dem Release separat pruefen und committen.")
+        return False
+
     lStatusResult = subprocess.run(
         ["git", "status", "--porcelain", "--", "version.ini"],
         capture_output=True, text=True, cwd=SCRIPT_DIR
@@ -418,7 +475,7 @@ def _commit_release_version(aVersion):
 
 
 def create_release(version):
-    """Erstellt Release lokal mit gh, wartet auf CI, laedt Standalone herunter."""
+    """Erstellt einen Tag, wartet auf CI, laedt Source-ZIP hoch und Standalone-ZIPs herunter."""
     lGh = _find_gh()
     if lGh is None:
         return False
@@ -434,22 +491,14 @@ def create_release(version):
         print(f"[tag]   FEHLER: Tag {version} existiert bereits!")
         return False
 
-    # Pushen
+    print(f"[tag]   Erstelle lokalen Tag {version} ...")
+    subprocess.run(["git", "tag", version], cwd=SCRIPT_DIR, check=True)
+
+    # Branch und Tag pushen
     print("[git]   Pushe commits ...")
     subprocess.run(["git", "push"], cwd=SCRIPT_DIR, check=True)
-
-    # GitHub Release erstellen (laedt Source-ZIP sofort hoch)
-    print(f"[gh]    Erstelle GitHub Release {version} ...")
-    lCreateResult = subprocess.run(
-        [lGh, "release", "create", version, ZIP_PATH,
-         "--title", f"KuchenApp {version}",
-         "--notes", f"Automatisches Release {version}"],
-        capture_output=True, text=True, cwd=SCRIPT_DIR
-    )
-    if lCreateResult.returncode != 0:
-        print(f"[gh]    FEHLER: {lCreateResult.stderr.strip()}")
-        return False
-    print(f"[gh]    Release {version} erstellt (Source-ZIP hochgeladen)")
+    print(f"[git]   Pushe Tag {version} ...")
+    subprocess.run(["git", "push", "origin", version], cwd=SCRIPT_DIR, check=True)
 
     # Auf CI warten (baut Standalone fuer Linux + Windows)
     print("[ci]    Warte auf GitHub Actions Workflow ...")
@@ -467,6 +516,15 @@ def create_release(version):
 
     print("[ci]    Workflow erfolgreich abgeschlossen!")
     print()
+
+    print(f"[gh]    Lade Source-ZIP zu Release {version} hoch ...")
+    lUploadResult = subprocess.run(
+        [lGh, "release", "upload", version, ZIP_PATH, "--clobber"],
+        capture_output=True, text=True, cwd=SCRIPT_DIR
+    )
+    if lUploadResult.returncode != 0:
+        print(f"[gh]    FEHLER: {lUploadResult.stderr.strip()}")
+        return False
 
     # Standalone-ZIPs vom Release herunterladen
     return download_release(version)
@@ -521,6 +579,7 @@ def _build_source():
     """Baut das Source-Bundle (ZIP)."""
     clean_build()
     compile_ui()
+    compile_docs()
     create_dirs()
     copy_files()
     write_readme()
@@ -558,6 +617,7 @@ def main():
     if lCiStandalone:
         clean_build()
         compile_ui()
+        compile_docs()
         create_dirs()
         copy_files()
         if build_standalone():

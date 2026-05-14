@@ -254,10 +254,9 @@ Kuchen/
 |   |-- assets/
 |   |   +-- kuchen_icon.svg
 |   +-- Data/
-|       |-- CakeData.csv
 |       |-- StandardCakeData.csv
-|       |-- Settings/settings.ini
-|       +-- Klassen/*.csv
+|       |-- Settings/settings.example.ini
+|       +-- Klassen/StandardKlasse.csv
 +-- release/                  # Generierte Releases (gitignored)
     |-- KuchenApp/            # Source-Bundle
     |-- KuchenApp.zip
@@ -270,7 +269,7 @@ Kuchen/
 
 \begin{description}[style=nextline, leftmargin=1.5em]
     \item[\texttt{develop/}] Enthaelt den vollstaendigen Quellcode, .ui-Designdateien
-        und Standard-/Demo-Daten. Hier wird aktiv entwickelt.
+        sowie neutrale Template-Dateien. Hier wird aktiv entwickelt.
     \item[\texttt{release/}] Wird durch \texttt{build\_release.py} automatisch generiert
         und via \texttt{.gitignore} nicht versioniert. Enthaelt nur die fuer den
         Endbenutzer noetigen Dateien. Die CSV-Dateien werden mit leeren
@@ -495,7 +494,7 @@ Dateiname = StandardKlasse.csv
 Dateiname = StandardCakeData.csv
 
 [IServ]
-Domain = wvss.de
+Domain = example.org
 \end{lstlisting}
 
 \begin{infobox}[Default-Werte]
@@ -563,7 +562,7 @@ Fehlerbehandlung faengt spezifische Exceptions:
 \texttt{ConnectionError}.
 
 
-\subsection{IServAPIEdited\_standalone.py -- IServ-API}
+\subsection{IServAPI.py -- IServ-API}
 
 Eine angepasste Version der IServ-API, die \textbf{ausschliesslich} die
 Python-Standardbibliothek verwendet (kein \texttt{pip install} noetig).
@@ -685,22 +684,22 @@ fuer beide Betriebssysteme.
 
 \begin{successbox}[Pipeline-Uebersicht]
 \begin{tabularx}{\textwidth}{lX}
-\textbf{Trigger:} & Version-Tag (\texttt{v*}) oder manueller Dispatch \\
-\textbf{Jobs:} & 3 parallele Jobs -- Source, Linux Standalone, Windows Standalone \\
-\textbf{Release:} & Erstellt ein GitHub Release mit allen 3 ZIPs \\
+\textbf{Trigger:} & Version-Tag (\texttt{v*}) \\
+\textbf{Jobs:} & Matrix-Build fuer Linux und Windows \\
+\textbf{Release:} & Haengt die Standalone-ZIPs an das GitHub Release an \\
 \end{tabularx}
 \end{successbox}
 
 \textbf{Workflow-Ablauf:}
 \begin{enumerate}[leftmargin=1.5em]
-    \item \textbf{source} (Ubuntu) -- baut \texttt{KuchenApp.zip} via
-        \texttt{build\_release.py -{}-no-download}
-    \item \textbf{standalone/linux} (Ubuntu) -- baut Linux-Binary via
-        \texttt{build\_release.py -{}-standalone}
-    \item \textbf{standalone/windows} (Windows) -- baut Windows-EXE via
-        \texttt{build\_release.py -{}-standalone}
-    \item \textbf{release} -- sammelt alle Artefakte und erstellt ein
-        GitHub Release mit Download-Anhaengen
+    \item \textbf{Tag-Push} -- der lokale Release-Build erstellt und pusht
+        einen Version-Tag (\texttt{v*}).
+    \item \textbf{Matrix-Build} -- GitHub Actions baut je eine Standalone-ZIP
+        fuer Linux und Windows mit \texttt{build\_release.py -{}-standalone}.
+    \item \textbf{Release-Upload} -- der Workflow haengt die Standalone-ZIPs an
+        das GitHub Release an.
+    \item \textbf{Source-Upload} -- das lokale Skript laedt anschliessend
+        \texttt{KuchenApp.zip} zum gleichen Release hoch.
 \end{enumerate}
 
 \begin{codebox}[Release ausloesen]
