@@ -132,6 +132,8 @@ UI_FILES = [
 # Asset-Dateien die nach assets/ kopiert werden
 ASSET_FILES = [
     "kuchen_icon.svg",
+    "chevron_down.svg",
+    "theme_dark_blue.qss",
 ]
 
 # Hauptdatei (bleibt im Root)
@@ -160,7 +162,9 @@ Projektstruktur:
   |-- KuchenMain.py            <- Hauptprogramm (hier starten)
   |-- README.txt               <- Diese Datei
   |-- assets/
-  |   +-- kuchen_icon.svg      <- App-Icon
+  |   |-- kuchen_icon.svg      <- App-Icon
+  |   |-- chevron_down.svg     <- Pfeil-Icon fuer ComboBoxen
+  |   +-- theme_dark_blue.qss  <- Zentrales Dark-Blue-Theme
   |-- src/
   |   |-- AppLogger.py         <- Singleton Logger (Signale fuer Fehlermeldungen)
   |   |-- DataManager.py       <- Datenverwaltung (CSV lesen/schreiben)
@@ -432,6 +436,14 @@ def _ensure_clean_worktree():
 
 def _commit_release_version(aVersion):
     """Committed nur die erwartete Versionsaenderung in version.ini."""
+    lIgnoredGeneratedPaths = {
+        "docs/benutzerdokumentation.pdf",
+        "docs/dokumentation.pdf",
+    }
+    lIgnoredGeneratedPrefixes = (
+        "release/",
+    )
+
     lFullStatusResult = subprocess.run(
         ["git", "status", "--porcelain"],
         capture_output=True, text=True, cwd=SCRIPT_DIR
@@ -443,8 +455,19 @@ def _commit_release_version(aVersion):
     lUnexpectedChanges = []
     for lStatusLine in lFullStatusResult.stdout.splitlines():
         lChangedPath = lStatusLine[3:]
-        if lChangedPath != "version.ini":
-            lUnexpectedChanges.append(lStatusLine)
+        if lChangedPath == "version.ini":
+            continue
+        if lChangedPath in lIgnoredGeneratedPaths:
+            continue
+        if any(lChangedPath.startswith(lPrefix) for lPrefix in lIgnoredGeneratedPrefixes):
+            continue
+        if " -> " in lChangedPath:
+            lChangedPath = lChangedPath.split(" -> ", 1)[1]
+            if lChangedPath in lIgnoredGeneratedPaths:
+                continue
+            if any(lChangedPath.startswith(lPrefix) for lPrefix in lIgnoredGeneratedPrefixes):
+                continue
+        lUnexpectedChanges.append(lStatusLine)
 
     if lUnexpectedChanges:
         print("[git]   FEHLER: Nach dem Build gibt es unerwartete Aenderungen:")

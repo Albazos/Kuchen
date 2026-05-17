@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QRadioButton, QButtonGroup, QHBoxLayout, QVBoxLayout, QGroupBox, QSizePolicy, QHeaderView
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QHeaderView
 from PySide6.QtGui import QStandardItem, QStandardItemModel, QIcon
 from PySide6.QtCore import Qt
 
@@ -16,13 +16,10 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setStyleSheet("")
         
         self.mDM = DM.DataManager()
         self.mKMM = None
-        self.mRadioButtons = []
-        self.mRbnAscending = None
-        self.mRbnDescending = None
-        self.mSortGroupBox = None
         
         self.mLogger = AL.AppLogger()
         self.mLogger.errorOccurred.connect(self._showError)
@@ -31,47 +28,32 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         
         self.clearLabels()
 
-        # Wrap search in a group box
-        lSearchGroup = QGroupBox("Search")
-        lSearchLayout = QVBoxLayout()
-        lSearchLayout.addWidget(self.leSearch)
-        lSearchGroup.setLayout(lSearchLayout)
-        self.verticalLayout_2.removeWidget(self.labSearch)
-        self.labSearch.deleteLater()
-        self.verticalLayout_2.removeWidget(self.leSearch)
-        self.verticalLayout_2.insertWidget(0, lSearchGroup)
-
-        # Remove the old sort label (will be replaced by group box title)
-        self.verticalLayout.removeWidget(self.labSort)
-        self.labSort.deleteLater()
-
-        # Give the table more horizontal space
-        self.horizontalLayout_2.setStretch(0, 1)
-        self.horizontalLayout_2.setStretch(1, 0)
-        self.tableView.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-
         self.pbnImport.clicked.connect(self.ImportFile)
+        self.pbnImportToolbar.clicked.connect(self.ImportFile)
         self.pbnSave.clicked.connect(self.SaveFile)
+        self.pbnSaveToolbar.clicked.connect(self.SaveFile)
         self.pbnQuit.clicked.connect(self.QuitButton)
-        self.pbnAdd.clicked.connect(self.AddRow)
+        self.pbnAddEntry.clicked.connect(self.AddRow)
         self.pbnDelete.clicked.connect(self.DeleteSelected)
         self.pbnOpenMailList.clicked.connect(self.ShowMailListDialog)
         self.pbnSendMail.clicked.connect(self.SendMails)
-        #self.pbnSendMail.setDisabled(True)
+        self.pbnAddColumn.clicked.connect(self.AddColumn)
+        self.pbnChangeClass.clicked.connect(self.ChangeClass)
 
-        self.leSearch.textChanged.connect(self.Search)
+        self.ledSearch.textChanged.connect(self.Search)
+        self.cmbSortField.currentIndexChanged.connect(self.SortColumn)
+        self.cmbSortDirection.currentIndexChanged.connect(self.SortColumn)
 
         self.model = QStandardItemModel()
-        self.tableView.setModel(self.model)
-        self.tableView.horizontalHeader().setStretchLastSection(True)
-        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tbvCakeList.setModel(self.model)
+        self.tbvCakeList.horizontalHeader().setStretchLastSection(True)
+        self.tbvCakeList.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         self.model.dataChanged.connect(self.CellEdited)
         if self.mDM.LoadStandardFile():
             self.mHeaders = self.mDM.mMainHeaders[:]
             self._createRadioButtons()
             self.SortColumn()
-            self.mLogger.info("Load", "Standard file loaded successfully.")
         else:
             self.mHeaders = []
             self.mLogger.warning("Load", "No standard file could be loaded.")
@@ -81,7 +63,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     
     def SaveFile(self):
         if self.mDM.SaveFile():
-            self.mLogger.info("Save", "File saved successfully.")
+            pass
         else:
             self.mLogger.error("Save", "Error saving file.")
             
@@ -127,11 +109,8 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
                     self.mHeaders = self.mDM.mMainHeaders[:]
                     self._createRadioButtons()
                     self.FillTable()
-                    self.mLogger.info("Import", "File imported successfully.")
                 else:
                     self.mLogger.error("Import", "Import failed.")
-        else:
-            self.mLogger.info("Import", "No file selected.")
 
 
 
@@ -140,6 +119,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(self.mHeaders)
         lSData = self.mDM.getSortedData()
+        self.lblTableMeta.setText(f"{len(lSData)} entries")
         if not lSData: 
             return
         for lRowID, lRowData in enumerate(lSData):  
@@ -158,7 +138,7 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
     
     
     def DeleteSelected(self):
-        lSelectedRows = sorted(set(index.row() for index in self.tableView.selectionModel().selectedIndexes()), reverse=True)
+        lSelectedRows = sorted(set(index.row() for index in self.tbvCakeList.selectionModel().selectedIndexes()), reverse=True)
         if lSelectedRows:
             lSData = self.mDM.getSortedData()
             lData = self.mDM.getData()
@@ -172,14 +152,13 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
             self.mDM.setData(lData)
             self.mDM.setSortedData(lSData)
             self.FillTable()
-            self.mLogger.info("Delete", "Successfully removed selected row(s).")
         else:
             self.mLogger.warning("Delete", "No rows selected.")
 
     
     def clearLabels(self, aSearch=False):
         if not aSearch:
-            self.leSearch.setText("")
+            self.ledSearch.setText("")
 
     
     def QuitButton(self):
@@ -197,19 +176,14 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
     
     def _isDescending(self):
-        return self.mRbnDescending is not None and self.mRbnDescending.isChecked()
+        return self.cmbSortDirection.currentText() == "Descending"
 
     def SortColumn(self):
-        lSortColumn = None
-        for lRbn in self.mRadioButtons:
-            if lRbn.isChecked():
-                lSortColumn = lRbn.property("headerKey")
-                break
-
+        lSortColumn = self.cmbSortField.currentText()
         if lSortColumn and lSortColumn in self.mHeaders:
             self.mDM.setSortedColumnIndex(self.mHeaders.index(lSortColumn))
             self.mDM.sortData(self.mDM.getSortedColumnIndex(), aReverse=self._isDescending())
-            lSearchText = self.leSearch.text()
+            lSearchText = self.ledSearch.text()
             if lSearchText.strip():
                 self.Search(lSearchText)
             else:
@@ -243,56 +217,24 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
             
     def checkforEnabledRBN(self):
-        return any(lRbn.isChecked() for lRbn in self.mRadioButtons)
+        return self.cmbSortField.currentText() in self.mHeaders
 
     def _createRadioButtons(self):
-        for lRbn in self.mRadioButtons:
-            lRbn.deleteLater()
-        self.mRadioButtons.clear()
+        lCurrentSelection = self.cmbSortField.currentText()
+        self.cmbSortField.blockSignals(True)
+        self.cmbSortField.clear()
+        self.cmbSortField.addItems(self.mHeaders)
+        if lCurrentSelection in self.mHeaders:
+            self.cmbSortField.setCurrentText(lCurrentSelection)
+        elif self.mHeaders:
+            self.cmbSortField.setCurrentIndex(0)
+        self.cmbSortField.blockSignals(False)
 
-        if self.mRbnAscending is not None:
-            self.mRbnAscending.deleteLater()
-            self.mRbnAscending = None
-        if self.mRbnDescending is not None:
-            self.mRbnDescending.deleteLater()
-            self.mRbnDescending = None
-        if self.mSortGroupBox is not None:
-            self.verticalLayout.removeWidget(self.mSortGroupBox)
-            self.mSortGroupBox.deleteLater()
+    def AddColumn(self):
+        self.mLogger.info("Add Column", "Add column is not implemented yet.")
 
-        self.mSortGroupBox = QGroupBox("Sort")
-        lSortLayout = QHBoxLayout()
-
-        lColumnLayout = QVBoxLayout()
-        for i, lHeader in enumerate(self.mHeaders):
-            lRbn = QRadioButton(lHeader)
-            lRbn.setProperty("headerKey", lHeader)
-            if i == 0:
-                lRbn.setChecked(True)
-            lColumnLayout.addWidget(lRbn)
-            self.mRadioButtons.append(lRbn)
-
-        lOrderLayout = QVBoxLayout()
-        self.mRbnAscending = QRadioButton("Ascending")
-        self.mRbnDescending = QRadioButton("Descending")
-        self.mRbnAscending.setChecked(True)
-        lOrderGroup = QButtonGroup(self)
-        lOrderGroup.addButton(self.mRbnAscending)
-        lOrderGroup.addButton(self.mRbnDescending)
-        lOrderLayout.addWidget(self.mRbnAscending)
-        lOrderLayout.addWidget(self.mRbnDescending)
-        lOrderLayout.addStretch()
-
-        lSortLayout.addLayout(lColumnLayout)
-        lSortLayout.addLayout(lOrderLayout)
-        self.mSortGroupBox.setLayout(lSortLayout)
-        self.verticalLayout.addWidget(self.mSortGroupBox)
-        self.verticalLayout.addStretch()
-
-        for lRbn in self.mRadioButtons:
-            lRbn.toggled.connect(self.SortColumn)
-        self.mRbnAscending.toggled.connect(self.SortColumn)
-        self.mRbnDescending.toggled.connect(self.SortColumn)
+    def ChangeClass(self):
+        self.mLogger.info("Change Class", "Change class is not implemented yet.")
 
     def _showError(self, aTitle, aMessage):
         QMessageBox.critical(self, aTitle, aMessage)
@@ -302,6 +244,15 @@ class CMainWindow(QMainWindow, Ui_MainWindow):
 
     def _showInfo(self, aTitle, aMessage):
         QMessageBox.information(self, aTitle, aMessage)
+
+
+def _load_app_theme(aApplication):
+    lBasePath = os.path.dirname(os.path.abspath(__file__))
+    lThemePath = os.path.join(lBasePath, "assets", "theme_dark_blue.qss")
+    lAssetDir = os.path.join(lBasePath, "assets").replace("\\", "/")
+    with open(lThemePath, encoding="utf-8") as lThemeFile:
+        lStylesheet = lThemeFile.read().replace("__ASSET_DIR__", lAssetDir)
+    aApplication.setStyleSheet(lStylesheet)
         
 if __name__ == "__main__":
     # Set AppUserModelID so Windows taskbar shows our icon instead of Python's
@@ -316,6 +267,7 @@ if __name__ == "__main__":
         base_path = os.path.dirname(os.path.abspath(__file__))
     icon_path = os.path.join(base_path, "assets", "kuchen_icon.svg")
     app.setWindowIcon(QIcon(icon_path))
+    _load_app_theme(app)
     lCMainWindow = CMainWindow()
     lCMainWindow.setWindowIcon(QIcon(icon_path))
     lCMainWindow.show()
