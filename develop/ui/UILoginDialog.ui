@@ -6,83 +6,268 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>640</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Send mails</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QLabel" name="labInfo">
-       <property name="text">
-        <string>Iserv Mail Login</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QFormLayout" name="formLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="labServer">
-         <property name="text">
-          <string>IServ Server</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="ledServer"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labMail">
-         <property name="text">
-          <string>Username</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="ledUser"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labPsw">
-         <property name="text">
-          <string>Password</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="ledPsw">
-         <property name="echoMode">
-          <enum>QLineEdit::EchoMode::Password</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QPushButton" name="pbnLogin">
-         <property name="text">
-          <string>Login</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbnCancel">
-         <property name="text">
-          <string>Cancel</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
+  <property name="styleSheet">
+   <string notr="true">QDialog, QWidget {
+    background: #23262d;
+    color: #e8edf5;
+    font-family: "Segoe UI";
+    font-size: 10pt;
+}
+
+QFrame#fraFormCard, QFrame#fraSummaryCard {
+    background: #2b3038;
+    border: 1px solid #3b4452;
+    border-radius: 16px;
+}
+
+QPushButton {
+    border: none;
+    border-radius: 10px;
+    background: #394352;
+    color: #eef4fb;
+    padding: 10px 14px;
+}
+
+QPushButton#pbnSendMails {
+    background: #2f6ea5;
+    color: white;
+    font-weight: 700;
+}
+
+QLabel#lblWindowTitle {
+    color: #7db2e3;
+    font-size: 18pt;
+    font-weight: 700;
+}
+
+QLabel#lblWindowSubtitle, QLabel#lblWindowHint {
+    color: #75767b;
+}
+
+QLineEdit {
+    background: #1f2329;
+    color: #eef4fb;
+    border: 1px solid #465263;
+    border-radius: 10px;
+    padding: 8px 10px;
+    selection-background-color: #3e7fba;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="layRoot">
+   <property name="spacing">
+    <number>14</number>
+   </property>
+   <property name="leftMargin">
+    <number>18</number>
+   </property>
+   <property name="topMargin">
+    <number>18</number>
+   </property>
+   <property name="rightMargin">
+    <number>18</number>
+   </property>
+   <property name="bottomMargin">
+    <number>18</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="lblWindowTitle">
+     <property name="text">
+      <string>Confirm and send</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblWindowSubtitle">
+     <property name="text">
+      <string>Review the target server and enter your credentials to send the prepared reminder mail.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="fraSummaryCard">
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <layout class="QHBoxLayout" name="laySummary">
+      <property name="leftMargin">
+       <number>14</number>
+      </property>
+      <property name="topMargin">
+       <number>14</number>
+      </property>
+      <property name="rightMargin">
+       <number>14</number>
+      </property>
+      <property name="bottomMargin">
+       <number>14</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="lblSummaryRecipients">
+        <property name="text">
+         <string>Recipients: 0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="laySubjectRow">
+        <item>
+         <widget class="QLabel" name="lblSubject">
+          <property name="text">
+           <string>Subject</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="ledSubject">
+          <property name="text">
+           <string>Kuchen reminder</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="fraFormCard">
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <layout class="QVBoxLayout" name="layFormCard">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>18</number>
+        </property>
+        <property name="topMargin">
+         <number>18</number>
+        </property>
+        <property name="rightMargin">
+         <number>18</number>
+        </property>
+        <property name="bottomMargin">
+         <number>18</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="lblFormTitle">
+          <property name="styleSheet">
+           <string notr="true">font-weight: 700; font-size: 11pt; background: transparent;</string>
+          </property>
+          <property name="text">
+           <string>Mail account</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="layForm">
+          <property name="labelAlignment">
+           <set>Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+          <property name="formAlignment">
+           <set>Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+          </property>
+          <property name="horizontalSpacing">
+           <number>16</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>12</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblServer">
+            <property name="text">
+             <string>Server</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="ledServer">
+            <property name="placeholderText">
+             <string>example.edu</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblUsername">
+            <property name="text">
+             <string>Username</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="ledUser">
+            <property name="placeholderText">
+             <string>your username</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblPassword">
+            <property name="text">
+             <string>Password</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="ledPsw">
+            <property name="echoMode">
+             <enum>QLineEdit::EchoMode::Password</enum>
+            </property>
+            <property name="placeholderText">
+             <string>••••••••</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="layButtons">
+          <item>
+           <spacer name="spcButtons">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbnCancel">
+            <property name="text">
+             <string>Cancel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbnSendMails">
+            <property name="text">
+             <string>Send mails</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblWindowHint">
+     <property name="text">
+      <string>The account details are only used for this send action and should stay easy to review.</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

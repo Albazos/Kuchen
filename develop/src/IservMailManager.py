@@ -18,8 +18,9 @@ class IservMailManager:
             #aMailData[0].remove(lFrom)
             lTo = aMailData[0]
             lHtmlBody = aMailData[1]
+            lSubject = aMailData[2] if len(aMailData) > 2 and aMailData[2] else "Kuchen reminder"
 
-            self.mAPIconnection.send_email(lTo,"Kuchenreminder",body="", html_body=lHtmlBody) # type: ignore
+            self.mAPIconnection.send_email(lTo, lSubject, body="", html_body=lHtmlBody) # type: ignore
             return True
         except (OSError, smtplib.SMTPException, ValueError, ConnectionError) as e:
             self.mLogger.error("Send Mail", f"Error sending mail: {e}")

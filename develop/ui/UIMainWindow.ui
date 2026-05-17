@@ -6,122 +6,487 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1280</width>
+    <height>820</height>
    </rect>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Kuchen</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QWidget {
+    background: #23262d;
+    color: #e8edf5;
+    font-family: "Segoe UI";
+    font-size: 10pt;
+}
+
+QFrame#fraSidebar {
+    background: #1b2430;
+    border-radius: 18px;
+}
+
+QFrame#fraClassCard {
+    background: #26364a;
+    border-radius: 14px;
+}
+
+QFrame#fraToolbarCard, QFrame#fraTableCard {
+    background: #2b3038;
+    border: 1px solid #3b4452;
+    border-radius: 16px;
+}
+
+QPushButton {
+    border: none;
+    border-radius: 10px;
+    background: #394352;
+    color: #eef4fb;
+    padding: 10px 14px;
+}
+
+QPushButton#pbnAddEntry {
+    background: #2f6ea5;
+    color: white;
+    font-weight: 700;
+}
+
+QPushButton#pbnSendMail {
+    background: #3e7fba;
+    color: white;
+    font-weight: 700;
+}
+
+QPushButton#pbnOpenMailList, QPushButton#pbnImport, QPushButton#pbnSave, QPushButton#pbnChangeClass {
+    background: #26364a;
+    color: white;
+}
+
+QLineEdit, QComboBox {
+    background: #1f2329;
+    color: #eef4fb;
+    border: 1px solid #465263;
+    border-radius: 10px;
+    padding: 8px 10px;
+    selection-background-color: #3e7fba;
+}
+
+QLabel#lblWindowTitle {
+    color: #7db2e3;
+    font-size: 20pt;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#lblSidebarTitle {
+    color: white;
+    font-size: 22pt;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#lblWindowSubtitle, QLabel#lblTableHint, QLabel#lblTableMeta {
+    color: #97a3b6;
+    background: transparent;
+}
+
+QLabel#lblSidebarSubtitle, QLabel#lblSidebarSectionSort {
+    color: rgba(255,255,255,180);
+    background: transparent;
+}
+
+QLabel#lblSidebarActiveClassCaption, QLabel#lblActiveClassName, QLabel#lblTableTitle {
+    background: transparent;
+}
+
+QTableView {
+    background: #2f343d;
+    alternate-background-color: #313741;
+    border: none;
+    color: #e8edf5;
+    gridline-color: #404958;
+    selection-background-color: #355f8c;
+    selection-color: white;
+}
+
+QHeaderView::section {
+    background: #353c48;
+    color: #f2f6fb;
+    border: none;
+    padding: 8px;
+    font-weight: 700;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QTableView" name="tableView"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QHBoxLayout" name="layRoot">
+    <property name="spacing">
+     <number>18</number>
+    </property>
+    <property name="leftMargin">
+     <number>18</number>
+    </property>
+    <property name="topMargin">
+     <number>18</number>
+    </property>
+    <property name="rightMargin">
+     <number>18</number>
+    </property>
+    <property name="bottomMargin">
+     <number>18</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="fraSidebar">
+      <property name="minimumSize">
+       <size>
+        <width>260</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <layout class="QVBoxLayout" name="laySidebar">
+       <property name="spacing">
+        <number>14</number>
+       </property>
+       <property name="leftMargin">
+        <number>18</number>
+       </property>
+       <property name="topMargin">
+        <number>22</number>
+       </property>
+       <property name="rightMargin">
+        <number>18</number>
+       </property>
+       <property name="bottomMargin">
+        <number>18</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblSidebarTitle">
+         <property name="text">
+          <string>Kuchen</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblSidebarSubtitle">
+         <property name="text">
+          <string>Cake management for classes</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="fraClassCard">
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <layout class="QVBoxLayout" name="layClassCard">
+          <property name="leftMargin">
+           <number>14</number>
+          </property>
+          <property name="topMargin">
+           <number>12</number>
+          </property>
+          <property name="rightMargin">
+           <number>14</number>
+          </property>
+          <property name="bottomMargin">
+           <number>12</number>
+          </property>
           <item>
-           <widget class="QLabel" name="labSearch">
+           <widget class="QLabel" name="lblSidebarActiveClassCaption">
+            <property name="styleSheet">
+             <string notr="true">color: rgba(255,255,255,180); background: transparent;</string>
+            </property>
             <property name="text">
-             <string>Search:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
+             <string>ACTIVE CLASS</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="leSearch">
-            <property name="clearButtonEnabled">
-             <bool>false</bool>
+           <widget class="QLabel" name="lblActiveClassName">
+            <property name="styleSheet">
+             <string notr="true">color: white; font-size: 18pt; font-weight: 700; background: transparent;</string>
+            </property>
+            <property name="text">
+             <string>EITB23A</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <widget class="QLabel" name="labSort">
-              <property name="text">
-               <string>Sort:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <layout class="QGridLayout" name="gridLayout">
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pbnSave">
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="pbnImport">
-                <property name="text">
-                 <string>Import</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QPushButton" name="pbnQuit">
-                <property name="text">
-                 <string>Quit</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QPushButton" name="pbnAdd">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Add New</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QPushButton" name="pbnDelete">
-                <property name="text">
-                 <string>Delete</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QPushButton" name="pbnSendMail">
-                <property name="text">
-                 <string>SendMails</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="pbnOpenMailList">
-                <property name="text">
-                 <string>View/Edit Mail List</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbnSendMail">
+         <property name="text">
+          <string>Send mails</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbnOpenMailList">
+         <property name="text">
+          <string>Open mail list</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbnImport">
+         <property name="text">
+          <string>Import CSV</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbnSave">
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbnChangeClass">
+         <property name="text">
+          <string>Change class</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spcSidebarTop">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>30</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblSidebarSectionSort">
+         <property name="text">
+          <string>SORTING</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cmbSortField"/>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cmbSortDirection">
+         <item>
+          <property name="text">
+           <string>Ascending</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Descending</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spcSidebarBottom">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>120</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="layContent">
+      <property name="spacing">
+       <number>14</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="lblWindowTitle">
+        <property name="text">
+         <string>Manage entries</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblWindowSubtitle">
+        <property name="text">
+         <string>Edit the list directly in the table and send reminders afterwards.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="fraToolbarCard">
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
+        </property>
+        <layout class="QHBoxLayout" name="layToolbar">
+         <property name="spacing">
+          <number>12</number>
+         </property>
+         <property name="leftMargin">
+          <number>14</number>
+         </property>
+         <property name="topMargin">
+          <number>14</number>
+         </property>
+         <property name="rightMargin">
+          <number>14</number>
+         </property>
+         <property name="bottomMargin">
+          <number>14</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="ledSearch">
+           <property name="placeholderText">
+            <string>Search</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbnDelete">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbnImportToolbar">
+           <property name="text">
+            <string>Import</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbnSaveToolbar">
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbnAddColumn">
+           <property name="text">
+            <string>+ Add column</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbnAddEntry">
+           <property name="text">
+            <string>+ New entry</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="fraTableCard">
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
+        </property>
+        <layout class="QVBoxLayout" name="layTableCard">
+         <property name="spacing">
+          <number>12</number>
+         </property>
+         <property name="leftMargin">
+          <number>14</number>
+         </property>
+         <property name="topMargin">
+          <number>14</number>
+         </property>
+         <property name="rightMargin">
+          <number>14</number>
+         </property>
+         <property name="bottomMargin">
+          <number>14</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="layTableMeta">
+           <item>
+            <widget class="QLabel" name="lblTableTitle">
+             <property name="styleSheet">
+              <string notr="true">font-weight: 700; font-size: 11pt; background: transparent;</string>
+             </property>
+             <property name="text">
+              <string>Cake list</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spcTableMeta">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblTableMeta">
+             <property name="text">
+              <string>0 entries</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTableView" name="tbvCakeList"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblTableHint">
+           <property name="text">
+            <string>Double-click to edit directly. Add a column to rebuild the table with more fields.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="layBottomBar">
+        <item>
+         <spacer name="spcBottom">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbnQuit">
+          <property name="text">
+           <string>Close</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -130,16 +495,6 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionImport">
-   <property name="text">
-    <string>Import</string>
-   </property>
-  </action>
-  <action name="actionExport">
-   <property name="text">
-    <string>Export</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>

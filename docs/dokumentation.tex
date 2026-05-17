@@ -186,11 +186,12 @@ automatisierten Versand von Erinnerungs-E-Mails ueber das IServ-System.
 \begin{itemize}[leftmargin=1.5em]
     \item CSV-Dateien importieren, bearbeiten und speichern
     \item Dynamische Tabellendarstellung mit Sortier- und Suchfunktion
-    \item Aufsteigende und absteigende Sortierung per Radio-Buttons
+    \item Aufsteigende und absteigende Sortierung per ComboBox-Auswahl
     \item Verwaltung einer Empfaenger-Mailliste (separater Dialog)
     \item Automatische HTML-Tabellengenerierung fuer E-Mail-Inhalte
-    \item E-Mail-Versand ueber IServ-SMTP mit Login-Dialog
+    \item E-Mail-Versand ueber IServ-SMTP mit editierbarem Subject
     \item INI-basierte Einstellungsverwaltung
+    \item Zentrales Dark-Blue-Theme ueber externe QSS-Datei
     \item Standalone-Build fuer Linux und Windows (PyInstaller)
     \item CI/CD ueber GitHub Actions mit automatischem Release
 \end{itemize}
@@ -252,7 +253,9 @@ Kuchen/
 |   |   |-- UIMailsDialog.ui / _ui.py
 |   |   +-- UILoginDialog.ui / _ui.py
 |   |-- assets/
-|   |   +-- kuchen_icon.svg
+|   |   |-- kuchen_icon.svg
+|   |   |-- chevron_down.svg
+|   |   +-- theme_dark_blue.qss
 |   +-- Data/
 |       |-- StandardCakeData.csv
 |       |-- Settings/settings.example.ini
@@ -389,17 +392,15 @@ der Anwendung.
 
 \begin{description}[style=nextline, leftmargin=1.5em]
     \item[\texttt{\_createRadioButtons()}]
-        Erzeugt dynamisch Radio-Buttons fuer jede CSV-Spalte (Sortierung)
-        sowie ein Ascending/Descending-Paar. Verwendet \texttt{QButtonGroup}
-        fuer die Sortierrichtung.
+        Befuellt die Sortier-ComboBox dynamisch mit allen aktuellen CSV-Headern.
     \item[\texttt{SortColumn()}]
-        Liest den ausgewaehlten Radio-Button aus, bestimmt den Spaltenindex
-        und ruft \texttt{DataManager.sortData()} mit dem
-        \texttt{aReverse}-Parameter auf. Beruecksichtigt aktive Suchfilter.
+        Liest die ausgewaehlte Spalte aus \texttt{cmbSortField} sowie die
+        Richtung aus \texttt{cmbSortDirection} und ruft
+        \texttt{DataManager.sortData()} entsprechend auf.
     \item[\texttt{Search(aText)}]
         Filtert die Originaldaten (\texttt{mData}) nach dem Suchbegriff.
-        Ist ein Sortier-Radio-Button aktiv, wird nur in der entsprechenden
-        Spalte gesucht. Ansonsten: Volltextsuche ueber alle Spalten.
+        Ist in der Sortier-ComboBox eine Spalte ausgewaehlt, wird nur in der
+        entsprechenden Spalte gesucht. Ansonsten: Volltextsuche ueber alle Spalten.
         Nach dem Filtern wird die Sortierung erneut angewandt.
     \item[\texttt{CellEdited(aItem)}]
         Aktualisiert den bearbeiteten Tabellenwert in \texttt{mSortedData}.
@@ -407,16 +408,20 @@ der Anwendung.
         wie die Originaldaten verweisen, bleibt \texttt{mData} dabei konsistent.
     \item[\texttt{FillTable()}]
         Loescht das \texttt{QStandardItemModel}, setzt Header und fuellt die
-        Tabelle aus \texttt{mSortedData}. Wird nach jeder Datenaenderung
-        aufgerufen.
+        Tabelle aus \texttt{mSortedData}. Aktualisiert zusaetzlich die
+        Metaanzeige mit der Anzahl der Eintraege.
     \item[\texttt{SendMails()}]
         Zeigt einen Bestaetigungsdialog mit der Empfaengeranzahl, oeffnet den
         Login-Dialog und wertet den Tri-State-Rueckgabewert aus
         (\texttt{None}=abgebrochen, \texttt{True}=gesendet,
         \texttt{False}=fehlgeschlagen).
+    \item[\texttt{\_load\_app\_theme()}]
+        Laedt die zentrale Datei \texttt{theme\_dark\_blue.qss}, ersetzt den
+        Platzhalter fuer den Asset-Pfad und bindet das Theme global in die
+        QApplication ein.
     \item[\texttt{ImportFile()}]
         Oeffnet einen \texttt{QFileDialog}, importiert die CSV und
-        aktualisiert die Radio-Buttons dynamisch anhand der neuen Header.
+        aktualisiert die Sortier-ComboBox dynamisch anhand der neuen Header.
 \end{description}
 
 \begin{warnbox}[PyInstaller-Kompatibilitaet]
@@ -445,7 +450,7 @@ Mail-Tabelle (Empfaenger) & \texttt{mMailData}, \texttt{mSortedMailData}, \textt
 \end{table}
 
 \begin{infobox}[Duale Datenhaltung]
-\texttt{mData} enthaelt immer die \emph{unsortierte} Originaldaten.
+\texttt{mData} enthaelt immer die \emph{unsortierten} Originaldaten.
 \texttt{mSortedData} ist eine gefilterte/sortierte Kopie, die in der Tabelle
 angezeigt wird. Dies ermoeglicht das Zuruecksetzen von Sortierung und Suche.
 \end{infobox}
@@ -533,14 +538,17 @@ verbindet diese Signale mit den entsprechenden \texttt{QMessageBox}-Methoden.
 der Empfaenger-Mailliste. Er teilt sich den \texttt{DataManager} mit dem
 Hauptfenster und arbeitet auf den Mail-Daten (\texttt{mMailData}).
 
-Die Funktionalitaet ist analog zum Hauptfenster: dynamische Radio-Buttons,
-Sortierung (ascending/descending), Suche, Import, Speichern, Zeilen
-hinzufuegen/loeschen.
+Die Funktionalitaet ist analog zum Hauptfenster: Sortierung per ComboBox,
+Suche, Import, Speichern, Zeilen hinzufuegen/loeschen und zentrale Theme-Nutzung.
+Der Button \texttt{pbnAddColumn} ist bereits in der Oberflaeche vorhanden,
+loggt derzeit aber nur, dass die Funktion noch nicht implementiert ist.
 
 
 \subsection{LoginDialog.py -- IServ-Login}
 
 \texttt{CLoginDialog} ist ein modaler Dialog fuer die SMTP-Authentifizierung.
+Der Dialog zeigt zusaetzlich die Empfaengeranzahl und ein editierbares
+Subject-Feld an.
 
 \begin{successbox}[Tri-State-Logik]
 \begin{itemize}[leftmargin=1.5em, nosep]
@@ -556,6 +564,10 @@ hinzufuegen/loeschen.
 Erstellt eine Verbindung zur IServ-API und sendet E-Mails ueber SMTP\_SSL.
 Das Passwort wird im \texttt{finally}-Block auf \texttt{None} gesetzt,
 um es nicht unnoetig im Speicher zu halten.
+
+Der Mail-Subject wird nicht mehr fest verdrahtet, sondern aus dem Login-Dialog
+uebernommen. Ist das Subject-Feld leer, wird auf \texttt{"Kuchen reminder"}
+zurueckgefallen.
 
 Fehlerbehandlung faengt spezifische Exceptions:
 \texttt{OSError}, \texttt{smtplib.SMTPException}, \texttt{ValueError},
@@ -599,8 +611,8 @@ Name,CakeCount,Hanuta,Waffel,Date
 
 \begin{infobox}[Dynamische Header]
 Die Header werden nicht hartcodiert, sondern aus der ersten Zeile der CSV-Datei
-gelesen. Die GUI-Radio-Buttons fuer die Sortierung werden dynamisch aus diesen
-Headern generiert.
+gelesen. Die GUI befuellt ihre Sortier-ComboBoxen dynamisch aus diesen
+Headern.
 \end{infobox}
 
 \subsection{Settings (INI)}
@@ -775,22 +787,23 @@ Windows & Doppelklick auf \texttt{KuchenApp.exe} \\
     \item \textbf{Daten laden:} Beim Start wird die zuletzt verwendete CSV
         automatisch geladen.
     \item \textbf{Import:} Ueber den \emph{Import}-Button kann eine andere
-        CSV-Datei geladen werden. Spalten und Sortier-Buttons passen
+        CSV-Datei geladen werden. Spalten und Sortier-ComboBox passen
         sich automatisch an.
     \item \textbf{Bearbeiten:} Zellen koennen direkt in der Tabelle
         bearbeitet werden (Doppelklick).
     \item \textbf{Zeilen hinzufuegen/loeschen:} Ueber die Buttons
-        \emph{Add New} und \emph{Delete}.
-    \item \textbf{Sortierung:} Radio-Buttons rechts neben der Tabelle.
-        Ascending/Descending waehlt die Richtung.
-    \item \textbf{Suche:} Das Suchfeld filtert live. Bei aktivem
-        Sortier-Button wird nur in der entsprechenden Spalte gesucht.
+        \emph{+ New entry} und \emph{Delete}.
+    \item \textbf{Sortierung:} ComboBoxes in der Sidebar.
+        \emph{Ascending}/\emph{Descending} waehlt die Richtung.
+    \item \textbf{Suche:} Das Suchfeld \emph{Search} filtert live. Bei aktiver
+        Sortier-Spalte wird nur in der entsprechenden Spalte gesucht.
     \item \textbf{Speichern:} Ueber den \emph{Save}-Button. Bei importierten
         Dateien wird der neue Dateiname in den Settings gespeichert.
-    \item \textbf{Mail-Liste:} Ueber \emph{View/Edit Mail List} oeffnet sich
+    \item \textbf{Mail-Liste:} Ueber \emph{Open mail list} oeffnet sich
         ein separater Dialog zur Verwaltung der Empfaenger.
-    \item \textbf{Mails senden:} Ueber \emph{SendMails}. Es erscheint eine
-        Bestaetigung mit der Empfaengeranzahl, dann der Login-Dialog.
+    \item \textbf{Mails senden:} Ueber \emph{Send mails}. Es erscheint eine
+        Bestaetigung mit der Empfaengeranzahl, dann der Login-Dialog mit
+        editierbarem Subject.
 \end{enumerate}
 
 

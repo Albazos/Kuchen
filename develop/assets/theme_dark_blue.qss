@@ -1,0 +1,204 @@
+QMainWindow, QDialog, QWidget {
+    background: #23262d;
+    color: #e8edf5;
+    font-family: "Segoe UI";
+    font-size: 10pt;
+}
+
+QFrame#fraSidebar {
+    background: #1b2430;
+    border-radius: 18px;
+}
+
+QFrame#fraClassCard {
+    background: #26364a;
+    border-radius: 14px;
+}
+
+QFrame#fraToolbarCard,
+QFrame#fraTableCard,
+QFrame#fraFormCard,
+QFrame#fraSummaryCard {
+    background: #2b3038;
+    border: 1px solid #3b4452;
+    border-radius: 16px;
+}
+
+QPushButton {
+    border: none;
+    border-radius: 10px;
+    background: #394352;
+    color: #eef4fb;
+    padding: 10px 14px;
+}
+
+QPushButton:hover {
+    background: #445066;
+}
+
+QPushButton:pressed {
+    background: #2f3848;
+}
+
+QPushButton#pbnAddEntry,
+QPushButton#pbnAddRecipient,
+QPushButton#pbnSendMails,
+QPushButton#pbnSendMailsSidebar {
+    background: #2f6ea5;
+    color: white;
+    font-weight: 700;
+}
+
+QPushButton#pbnSendMail,
+QPushButton#pbnSaveRecipientList {
+    background: #3e7fba;
+    color: white;
+    font-weight: 700;
+}
+
+QPushButton#pbnOpenMailList,
+QPushButton#pbnImport,
+QPushButton#pbnSave,
+QPushButton#pbnChangeClass {
+    background: #26364a;
+    color: white;
+}
+
+QLineEdit,
+QComboBox {
+    background: #1f2329;
+    color: #eef4fb;
+    border: 1px solid #465263;
+    border-radius: 10px;
+    padding: 8px 12px;
+    selection-background-color: #3e7fba;
+}
+
+QLineEdit:focus,
+QComboBox:focus {
+    border: 1px solid #5d8fbe;
+}
+
+QComboBox {
+    padding-right: 34px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 30px;
+    border: none;
+    background: transparent;
+}
+
+QComboBox::down-arrow {
+    image: url("__ASSET_DIR__/chevron_down.svg");
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox QAbstractItemView {
+    background: #252a32;
+    color: #eef4fb;
+    border: 1px solid #465263;
+    selection-background-color: #355f8c;
+    selection-color: white;
+    outline: none;
+}
+
+QLabel#lblWindowTitle {
+    color: #7db2e3;
+    font-size: 20pt;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#lblSidebarTitle {
+    color: white;
+    font-size: 22pt;
+    font-weight: 700;
+    background: transparent;
+}
+
+QLabel#lblWindowSubtitle,
+QLabel#lblTableHint,
+QLabel#lblTableMeta,
+QLabel#lblWindowHint,
+QLabel#lblSidebarSubtitle,
+QLabel#lblSidebarSectionSort,
+QLabel#lblSidebarActiveClassCaption,
+QLabel#lblActiveClassName,
+QLabel#lblTableTitle,
+QLabel#lblFormTitle,
+QLabel#lblSummaryRecipients,
+QLabel#lblSummarySubject,
+QLabel#lblSidebarNote {
+    background: transparent;
+}
+
+QLabel#lblWindowSubtitle,
+QLabel#lblTableHint,
+QLabel#lblTableMeta,
+QLabel#lblWindowHint {
+    color: #97a3b6;
+}
+
+QLabel#lblSidebarSubtitle,
+QLabel#lblSidebarSectionSort,
+QLabel#lblSidebarActiveClassCaption,
+QLabel#lblSidebarNote {
+    color: rgba(255,255,255,180);
+}
+
+QLabel#lblActiveClassName,
+QLabel#lblTableTitle,
+QLabel#lblFormTitle,
+QLabel#lblSummaryRecipients,
+QLabel#lblSummarySubject {
+    color: #eef4fb;
+}
+
+QTableView {
+    background: #2f343d;
+    alternate-background-color: #313741;
+    border: none;
+    color: #e8edf5;
+    gridline-color: #404958;
+    selection-background-color: #355f8c;
+    selection-color: white;
+    outline: none;
+}
+
+QHeaderView::section {
+    background: #353c48;
+    color: #f2f6fb;
+    border: none;
+    padding: 10px 8px;
+    font-weight: 700;
+}
+
+QScrollBar:vertical {
+    background: #252a32;
+    width: 12px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #445066;
+    border-radius: 6px;
+    min-height: 24px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical,
+QScrollBar::left-arrow:vertical,
+QScrollBar::right-arrow:vertical,
+QScrollBar::up-arrow:vertical,
+QScrollBar::down-arrow:vertical {
+    background: transparent;
+    border: none;
+    width: 0;
+    height: 0;
+}

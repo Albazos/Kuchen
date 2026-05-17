@@ -207,17 +207,20 @@ $\rightarrow$ \emph{Trotzdem ausfuehren}, um die App zu starten.
 % =====================================================================
 \section{Das Hauptfenster im Ueberblick}
 
-Nach dem Start zeigt die KuchenApp das Hauptfenster mit folgenden Bereichen:
+Nach dem Start zeigt die KuchenApp ein dunkles Hauptfenster mit blauen
+Akzentfarben. Die Oberflaeche ist in eine linke Seitenleiste und einen grossen
+Arbeitsbereich aufgeteilt.
 
 \begin{center}
 \begin{tabularx}{\linewidth}{l X}
 \toprule
 \textbf{Bereich} & \textbf{Funktion} \\
 \midrule
+\textbf{Sidebar} & Enth\"alt die Hauptaktionen \emph{Send mails}, \emph{Open mail list}, \emph{Import CSV}, \emph{Save} und \emph{Change class}. Ausserdem befinden sich dort die beiden Sortier-Dropdowns. \\
+\textbf{Search} & Filtert die Tabelle nach dem eingegebenen Begriff. \\
+\textbf{Sorting} & Auswahl der Spalte und der Richtung ueber zwei Dropdown-Felder (\emph{Ascending}/\emph{Descending}). \\
+\textbf{Toolbar} & Aktionen direkt ueber der Tabelle: \emph{Delete}, \emph{Import}, \emph{Save}, \emph{+ Add column}, \emph{+ New entry}. \\
 \textbf{Tabelle} & Zeigt die aktuelle Kuchen-Liste an. Zellen koennen direkt bearbeitet werden. \\
-\textbf{Suche} & Filtert die Tabelle nach dem eingegebenen Begriff. \\
-\textbf{Sort} & Auswahl der Spalte, nach der sortiert wird (auf-/absteigend). \\
-\textbf{Buttons} & Aktionen wie Importieren, Speichern, Hinzufuegen, Loeschen, Mailliste, Senden. \\
 \textbf{Hinweisdialoge} & Zeigen Erfolgs-, Warn- und Fehlermeldungen als Dialogfenster an. \\
 \bottomrule
 \end{tabularx}
@@ -248,11 +251,12 @@ direkt in der App eingetragen oder ueber CSV-Dateien importiert werden.
 
 \begin{infobox}[CSV-Format]
 Eine gueltige CSV-Datei besteht aus einer Kopfzeile und beliebig vielen
-Datenzeilen, jeweils kommagetrennt. Beispiel:
+Datenzeilen, jeweils durch ein Trennzeichen wie Komma oder Semikolon getrennt.
+Beispiel:
 \begin{center}
-\texttt{Name,Datum,Status} \\
-\texttt{Max Mustermann,01.05.2026,offen} \\
-\texttt{Erika Beispiel,08.05.2026,zugesagt}
+\texttt{Name,CakeCount,Hanuta,Waffel,Date} \\
+\texttt{Max Mustermann,1,,Apfelmus,01.05.2026} \\
+\texttt{Erika Beispiel,2,Ja,,08.05.2026}
 \end{center}
 \end{infobox}
 
@@ -260,25 +264,33 @@ Datenzeilen, jeweils kommagetrennt. Beispiel:
 
 \begin{itemize}[leftmargin=1.5em]
     \item \textbf{Bearbeiten:} Klicke doppelt in eine Zelle und gib den neuen Wert ein.
-    \item \textbf{Hinzufuegen:} Klicke auf \textbf{Add}, um eine leere Zeile am Ende der Tabelle einzufuegen.
+    \item \textbf{Hinzufuegen:} Klicke auf \textbf{+ New entry}, um eine leere Zeile am Ende der Tabelle einzufuegen.
     \item \textbf{Loeschen:} Markiere eine oder mehrere Zeilen und klicke auf \textbf{Delete}.
 \end{itemize}
 
 \subsection{Sortieren und Suchen}
 
 \begin{itemize}[leftmargin=1.5em]
-    \item Im Bereich \textbf{Sort} eine Spalte sowie \emph{Ascending} oder
-          \emph{Descending} auswaehlen -- die Tabelle wird sofort umsortiert.
-    \item Im Suchfeld einen Begriff eingeben -- die Tabelle zeigt nur noch
-          passende Zeilen an. Ist eine Sortier-Spalte aktiv, wird nur in dieser
-          Spalte gesucht; andernfalls wird die gesamte Tabelle durchsucht.
+    \item In der linken Seitenleiste im Bereich \textbf{SORTING} eine Spalte sowie
+          \emph{Ascending} oder \emph{Descending} auswaehlen -- die Tabelle wird sofort umsortiert.
+    \item Im Feld \textbf{Search} einen Begriff eingeben -- die Tabelle zeigt nur noch
+          passende Zeilen an. Ist im Sortierfeld eine Spalte ausgewaehlt, wird nur in
+          dieser Spalte gesucht; andernfalls wird die gesamte Tabelle durchsucht.
 \end{itemize}
+
+\subsection{Neue Spalten hinzufuegen}
+
+\begin{warnbox}[Aktueller Stand]
+Der Button \textbf{+ Add column} ist in der Oberflaeche bereits vorhanden, die
+Funktion ist aktuell aber noch nicht umgesetzt. Beim Anklicken erscheint nur
+eine Informationsmeldung.
+\end{warnbox}
 
 \subsection{Aenderungen speichern}
 
-Klicke auf \textbf{Save}, um die aktuellen Daten zurueck in die CSV-Datei zu
-schreiben. Beim Beenden der Anwendung wird ausserdem gefragt, ob ungespeicherte
-Aenderungen gesichert werden sollen.
+Klicke auf \textbf{Save} in der Sidebar oder in der Toolbar, um die aktuellen
+Daten zurueck in die CSV-Datei zu schreiben. Beim Beenden der Anwendung wird
+ausserdem gefragt, ob ungespeicherte Aenderungen gesichert werden sollen.
 
 \begin{warnbox}[Datenverlust vermeiden]
 Speichere regelmaessig zwischen. Beendest du die App ueber das X des Fensters
@@ -294,9 +306,10 @@ verloren.
 \begin{stepbox}[Mailliste oeffnen]
 \begin{enumerate}[leftmargin=1.5em]
     \item Klicke im Hauptfenster auf \textbf{Open Mail List}.
-    \item Es oeffnet sich ein separater Dialog mit allen aktuellen Empfaengern.
+    \item Es oeffnet sich ein separater Dialog im gleichen dunklen Design mit
+          eigener Sidebar, Search-Feld und Toolbar.
     \item Pflege die Eintraege wie in der Hauptliste (bearbeiten, hinzufuegen,
-          loeschen) und schliesse den Dialog ueber den Schliessen-Button.
+          loeschen) und schliesse den Dialog ueber \textbf{Close} unten rechts.
 \end{enumerate}
 \end{stepbox}
 
@@ -304,6 +317,12 @@ verloren.
 Jede Zeile enthaelt einen Namen und eine gueltige IServ-E-Mail-Adresse, z.\,B.
 \texttt{vorname.nachname@meine-schule.de}.
 \end{infobox}
+
+\begin{warnbox}[Weitere Spalten]
+Auch im Maillisten-Dialog gibt es bereits einen Button \textbf{+ Add column}.
+Wie im Hauptfenster ist diese Funktion im Moment nur vorbereitet und noch nicht
+fertig umgesetzt.
+\end{warnbox}
 
 % =====================================================================
 \section{Erinnerungs-Mails versenden}
@@ -313,12 +332,12 @@ Jede Zeile enthaelt einen Namen und eine gueltige IServ-E-Mail-Adresse, z.\,B.
 \begin{stepbox}[Mails senden]
 \begin{enumerate}[leftmargin=1.5em]
     \item Stelle sicher, dass die Kuchen-Liste und die Mailliste aktuell sind.
-    \item Klicke auf \textbf{Send Mail}.
+    \item Klicke auf \textbf{Send mails}.
     \item Bestaetige die Sicherheitsabfrage \emph{"`Mail an X Empfaenger
           senden?"'} mit \textbf{Ja}.
-    \item Im folgenden Login-Dialog deinen IServ-Benutzernamen und das
-          dazugehoerige Passwort eingeben.
-    \item Auf \textbf{Login / Senden} klicken -- die Mails werden ueber den
+    \item Im folgenden Dialog Server, Benutzername und Passwort eingeben.
+    \item Optional den \textbf{Subject}-Text anpassen.
+    \item Auf \textbf{Send mails} klicken -- die Mails werden ueber den
           IServ-Mailserver verschickt.
 \end{enumerate}
 \end{stepbox}
@@ -332,7 +351,7 @@ Bei erfolgreichem Versand erscheint ein Informationsdialog mit der Meldung
 
 Die App generiert automatisch eine HTML-E-Mail mit der aktuellen Kuchen-Liste
 als formatierte Tabelle. Jeder Empfaenger erhaelt dieselbe Uebersicht und kann
-so seinen Eintrag direkt erkennen.
+so seinen Eintrag direkt erkennen. Der Betreff ist im Versanddialog editierbar.
 
 \begin{warnbox}[Hinweis zum Passwort]
 Dein IServ-Passwort wird ausschliesslich fuer den aktuellen Versand verwendet
