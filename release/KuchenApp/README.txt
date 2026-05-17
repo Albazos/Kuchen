@@ -20,7 +20,9 @@ Projektstruktur:
   |-- KuchenMain.py            <- Hauptprogramm (hier starten)
   |-- README.txt               <- Diese Datei
   |-- assets/
-  |   +-- kuchen_icon.svg      <- App-Icon
+  |   |-- kuchen_icon.svg      <- App-Icon
+  |   |-- chevron_down.svg     <- Pfeil-Icon fuer ComboBoxen
+  |   +-- theme_dark_blue.qss  <- Zentrales Dark-Blue-Theme
   |-- src/
   |   |-- AppLogger.py         <- Singleton Logger (Signale fuer Fehlermeldungen)
   |   |-- DataManager.py       <- Datenverwaltung (CSV lesen/schreiben)
