@@ -1,6 +1,8 @@
 # Publishing Guide
 
-Diese Anleitung beschreibt, wie du das `Kuchen`-Repository ohne GitHub-Organisation veroeffentlichst und gleichzeitig sicherstellst, dass Aenderungen nur ueber Pull Requests und mit deiner Freigabe in `develop` landen.
+Diese Anleitung zeigt, wie du das `Kuchen`-Repository ohne GitHub-Organisation
+veroeffentlichst und trotzdem dafuer sorgst, dass Aenderungen nur ueber Pull
+Requests in `develop` landen.
 
 ## Ziel
 
@@ -11,12 +13,12 @@ Am Ende soll das Repository so aufgesetzt sein:
 - Beitraege laufen ueber Pull Requests
 - direkte Aenderungen am Hauptbranch `develop` sind gesperrt
 - ein Merge braucht eine Freigabe
-- idealerweise braucht es deine Freigabe als Code Owner
+- Freigaben laufen ueber feste Reviewer oder Code Owner
 
 ## Empfohlene Reihenfolge
 
 1. Repository auf `public` stellen
-2. Lehrkraft optional als Collaborator hinzufuegen
+2. Lehrkraft als Collaborator hinzufuegen, wenn spaetere Mitarbeit sinnvoll ist
 3. Branch `develop` per Ruleset schuetzen
 4. `CODEOWNERS` einrichten
 5. Pull-Request-Workflow kommunizieren
@@ -58,7 +60,8 @@ Fuer reines Lesen ist keine Einladung noetig, weil das Repository ja oeffentlich
 
 ## 3. Branch `develop` schuetzen
 
-Da dein Arbeitsbranch jetzt `develop` ist, sollte genau dieser Branch abgesichert werden.
+Da dein Arbeitsbranch `develop` ist, sollte genau dieser Branch abgesichert
+werden.
 
 ### Schritte
 
@@ -66,7 +69,7 @@ Da dein Arbeitsbranch jetzt `develop` ist, sollte genau dieser Branch abgesicher
 2. Links `Rules` > `Rulesets`
 3. `New ruleset`
 4. `New branch ruleset`
-5. Als Namen zum Beispiel `Protect develop` vergeben
+5. Einen eindeutigen Namen wie `Protect develop` vergeben
 6. Als Zielbranch `develop` auswaehlen
 
 ### Diese Regeln aktivieren
@@ -91,7 +94,8 @@ Da dein Arbeitsbranch jetzt `develop` ist, sollte genau dieser Branch abgesicher
 
 ## 4. CODEOWNERS einrichten
 
-Wenn du moechtest, dass moeglichst deine Freigabe gebraucht wird, solltest du `CODEOWNERS` verwenden.
+Wenn die Freigabe ueber feste Personen laufen soll, ist `CODEOWNERS` die
+passende Loesung.
 
 Lege eine Datei an:
 
@@ -135,22 +139,23 @@ Danach aktivierst du im Ruleset zusaetzlich:
 4. Review abwarten
 5. Erst nach Freigabe mergen
 
-## 6. Was du Lehrkraft und Schuelern sagen kannst
+## 6. Kommunikation an Lehrkraft und Schueler
 
-Ein kurzer Standardtext koennte so aussehen:
+Den folgenden Text kannst du zum Beispiel ins README, in die
+Projektbeschreibung oder in eine Nachricht uebernehmen:
 
 > Das Repository ist oeffentlich, damit der Code langfristig sichtbar und nutzbar bleibt. Bitte arbeitet nicht direkt auf `develop`, sondern immer ueber Branches und Pull Requests. Aenderungen werden vor dem Merge geprueft. Wer das Projekt aktiv mitpflegen moechte, kann sich melden oder zuerst einen Pull Request einreichen.
 
-## 7. Empfohlene Grundeinstellung fuer dein Projekt
+## 7. Grundeinstellung fuer dieses Projekt
 
-Fuer `Kuchen` wuerde ich dieses Setup empfehlen:
+Fuer `Kuchen` passt folgendes Setup gut:
 
 - Repository: `public`
 - Hauptbranch: `develop`
 - Branch-Regeln: Pull Request erforderlich
 - Required approvals: `1`
 - Code Owners: aktiviert
-- Direkter Schreibzugriff: nur du und optional Lehrkraft
+- Direkter Schreibzugriff: nur du und bei Bedarf die betreuende Lehrkraft
 - Weitere Schueler: ueber Forks und Pull Requests
 
 ## 8. Wichtige Hinweise
@@ -173,11 +178,12 @@ Deshalb gibt es zwei sinnvolle Varianten:
 /.github/ @DEIN_GITHUB_USERNAME @LEHRER_USERNAME
 ```
 
-Dann kann entweder du oder die Lehrkraft freigeben.
+Dann kann entweder die Lehrkraft oder du selbst freigeben.
 
-## 9. Optional spaeter
+## 9. Weitere sinnvolle Ergaenzungen
 
-Wenn das Projekt nach deiner Schulzeit weiterlebt, kannst du spaeter noch ergaenzen:
+Wenn das Projekt laenger genutzt wird, koennen spaeter noch diese Punkte
+dazukommen:
 
 - `CODEOWNERS`
 - Pull-Request-Template

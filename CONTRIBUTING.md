@@ -4,7 +4,8 @@ Vielen Dank fuer dein Interesse an der Weiterentwicklung von KuchenApp.
 
 ## Grundidee
 
-Kleinere und groessere Verbesserungen sind willkommen. Damit das Projekt auch fuer Lehrkraefte und Schueler spaeter gut wartbar bleibt, sollen Aenderungen moeglichst nachvollziehbar und konsistent eingebracht werden.
+Kleinere und groessere Verbesserungen sind willkommen. Wichtig ist vor allem,
+dass Aenderungen nachvollziehbar bleiben und zum restlichen Projekt passen.
 
 ## Empfohlener Ablauf
 
@@ -45,9 +46,12 @@ Weitere Hinweise:
 
 ## Maintainer-Hinweis
 
-Wenn du als Schueler beitragen willst, aber keinen direkten Schreibzugriff hast, ist das normal. Bitte arbeite ueber Forks und Pull Requests.
+Wenn du als Schueler beitragen willst, aber keinen direkten Schreibzugriff
+hast, ist das voellig normal. In dem Fall einfach ueber Forks und Pull Requests
+arbeiten.
 
-Direkter Schreibzugriff sollte nur an wenige verantwortliche Personen vergeben werden, zum Beispiel:
+Direkter Schreibzugriff sollte nur an wenige verantwortliche Personen vergeben
+werden:
 
 - betreuende Lehrkraft
 - aktuelle Projektverantwortliche

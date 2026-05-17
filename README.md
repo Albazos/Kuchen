@@ -2,7 +2,10 @@
 
 KuchenApp ist eine Desktop-Anwendung zur Verwaltung von Kuchen-Listen und zum Versenden von Erinnerungs-Mails ueber IServ.
 
-Das Projekt ist waehrend meiner Schulzeit entstanden, um nachzuhalten, wer als Naechstes Kuchen mitbringen muss. Da ich die Schule bald verlasse, ist dieses Repository so vorbereitet, dass Lehrkraefte und Schueler das Projekt weiterverwenden, pflegen und erweitern koennen.
+Das Projekt ist waehrend meiner Schulzeit entstanden, um einfacher im Blick zu
+behalten, wer als Naechstes Kuchen mitbringen muss. Da ich die Schule bald
+verlasse, ist das Repository so vorbereitet, dass Lehrkraefte und Schueler das
+Projekt weiterverwenden und bei Bedarf erweitern koennen.
 
 ## Ziele
 
@@ -68,8 +71,9 @@ Lokal und nicht versioniert:
 
 ## Eigene Daten einrichten
 
-Fuer den ersten Einsatz reichen die Templates aus. Optional kannst du eigene
-Dateien anlegen oder spaeter ueber die Import-Funktion laden.
+Fuer den ersten Einsatz reichen die mitgelieferten Templates aus. Eigene
+Dateien lassen sich direkt anlegen oder spaeter ueber die Import-Funktion
+laden.
 
 ### Klassendatei
 
@@ -91,9 +95,9 @@ Name,CakeCount,Hanuta,Waffel,Date
 ### Einstellungen
 
 Wenn keine lokale `settings.ini` vorhanden ist, verwendet die Anwendung
-automatisch die eingebauten Standardwerte. Optional kannst du
-`develop/Data/Settings/settings.example.ini` als Vorlage fuer eine eigene
-`settings.ini` verwenden.
+automatisch die eingebauten Standardwerte.
+`develop/Data/Settings/settings.example.ini` dient als Vorlage fuer eine eigene
+`settings.ini`.
 
 ## Plattformen
 
@@ -106,13 +110,16 @@ Helper-Skripte:
 
 ## Weiterentwicklung
 
-Beitraege sind willkommen. Fuer groessere Aenderungen bitte einen Pull Request erstellen, damit die Aenderungen nachvollziehbar bleiben.
+Beitraege sind willkommen. Bei groesseren Aenderungen ist ein Pull Request am
+sinnvollsten, damit alles nachvollziehbar bleibt.
 
 Die wichtigsten Hinweise fuer Beitraege stehen in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Uebergabe und Zukunft
 
-Dieses Projekt kann auch nach meiner Schulzeit weiterverwendet werden. Ein Vorschlag fuer Rollen, Zugriff und Pflege steht in [HANDOVER_PROPOSAL.md](HANDOVER_PROPOSAL.md).
+Dieses Projekt ist so vorbereitet, dass es auch nach meiner Schulzeit
+weiterverwendet werden kann. Hinweise zu Rollen, Zugriff und Pflege stehen in
+[HANDOVER_PROPOSAL.md](HANDOVER_PROPOSAL.md).
 
 ## Lizenz
 

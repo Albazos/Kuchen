@@ -2,11 +2,12 @@
 
 ## Ziel
 
-KuchenApp soll auch nach meiner Schulzeit weiter genutzt und bei Bedarf erweitert werden koennen, ohne dass die Pflege an einer einzelnen Person haengen bleibt.
+KuchenApp soll auch nach meiner Schulzeit weiter genutzt werden koennen, ohne
+dass alles an einer einzigen Person haengen bleibt.
 
 ## Empfohlene Organisation
 
-Ich empfehle folgendes Modell:
+Fuer die weitere Pflege bietet sich folgendes Modell an:
 
 - Das Repository bleibt oder wird oeffentlich, damit Lehrkraefte und Schueler den Code jederzeit einsehen koennen.
 - Direkter Schreibzugriff wird nur an wenige verantwortliche Personen vergeben.
@@ -16,26 +17,25 @@ Ich empfehle folgendes Modell:
 
 ### Lehrkraft
 
-- sollte dauerhaft Zugriff auf das Projekt haben
-- sollte idealerweise Maintainer- oder Admin-Rechte erhalten
+- hat dauerhaft Zugriff auf das Projekt
+- uebernimmt nach Moeglichkeit Maintainer- oder Admin-Rechte
 - kann spaeter neue verantwortliche Schueler einladen
 
 ### Verantwortliche Schueler
 
-- koennen bei Bedarf direkten Schreibzugriff bekommen
-- sollten Aenderungen trotzdem moeglichst ueber Branches und Pull Requests einbringen
+- koennen bei Bedarf direkten Schreibzugriff erhalten
+- bringen Aenderungen trotzdem weiter ueber Branches und Pull Requests ein
 
 ### Weitere Schueler
 
 - koennen das Projekt forken
-- koennen Verbesserungen ueber Pull Requests vorschlagen
-- brauchen dafuer keinen direkten Schreibzugriff
+- bringen Verbesserungen ueber Pull Requests ein
+- benoetigen dafuer keinen direkten Schreibzugriff
 
 ## Empfehlung zur Plattform
 
-Langfristig ist es am sinnvollsten, das Projekt nicht nur an ein privates Benutzerkonto zu binden.
-
-Am besten waere:
+Langfristig ist es besser, wenn das Projekt nicht nur an ein privates
+Benutzerkonto gebunden ist.
 
 - entweder eine kleine GitHub-Organisation fuer das Projekt oder die Schule
 - oder spaeter eine Uebertragung an die betreuende Lehrkraft
@@ -53,12 +53,13 @@ Fuer ein oeffentliches Repository gilt:
 - Lesen ist immer ohne Anfrage moeglich
 - Schreiben wird manuell ueber Collaborators oder Organisationsteams vergeben
 
-Deshalb ist der beste Weg:
+Am sinnvollsten ist deshalb:
 
 - allgemeine Mitarbeit ueber Pull Requests
 - direkter Schreibzugriff nur nach Ruecksprache
 
-Wenn spaeter ein fester Anlaufpunkt gewuenscht ist, kann in das README oder in die Projektbeschreibung ein kurzer Hinweis aufgenommen werden, zum Beispiel:
+Wenn spaeter ein fester Anlaufpunkt benannt werden soll, kann im README oder in
+der Projektbeschreibung ein kurzer Hinweis aufgenommen werden:
 
 > Wenn du das Projekt aktiv mitpflegen moechtest, melde dich bitte bei der betreuenden Lehrkraft oder erstelle zunaechst einen Pull Request.
 
@@ -72,6 +73,6 @@ Wenn spaeter ein fester Anlaufpunkt gewuenscht ist, kann in das README oder in d
 
 ## Vorschlag fuer einen kurzen Uebergabetext
 
-Der folgende Text kann so oder aehnlich verwendet werden:
+Der folgende Text passt gut als Uebergabetext:
 
-> Ich habe die KuchenApp waehrend meiner Schulzeit entwickelt, damit die Organisation rund um Kuchenlisten und Erinnerungen einfacher wird. Da ich die Schule bald verlasse, moechte ich das Projekt so uebergeben, dass es weiterhin genutzt und bei Bedarf erweitert werden kann. Mein Vorschlag ist, das Repository oeffentlich verfuegbar zu lassen, damit Lehrkraefte und Schueler den Code einsehen koennen. Direkter Schreibzugriff sollte nur an wenige verantwortliche Personen vergeben werden, waehrend weitere Verbesserungen ueber Pull Requests eingebracht werden. So bleibt das Projekt offen, nachvollziehbar und auch in Zukunft wartbar.
+> Ich habe die KuchenApp waehrend meiner Schulzeit entwickelt, um die Organisation rund um Kuchenlisten und Erinnerungen einfacher zu machen. Da ich die Schule bald verlasse, soll das Projekt so uebergeben werden, dass es weiterhin genutzt und bei Bedarf erweitert werden kann. Das Repository bleibt oeffentlich, damit Lehrkraefte und Schueler den Code einsehen koennen. Direkter Schreibzugriff bleibt bei wenigen verantwortlichen Personen, waehrend weitere Aenderungen ueber Pull Requests eingebracht werden. So bleibt das Projekt offen und weiterhin gut nutzbar.
